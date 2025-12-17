@@ -17,3 +17,5 @@ export default async function DashboardPage() {
     </div>
   );
 }
+
+// This page is set to always be dynamically rendered on each request
