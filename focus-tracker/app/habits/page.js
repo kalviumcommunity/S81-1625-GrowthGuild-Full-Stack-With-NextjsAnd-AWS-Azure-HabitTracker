@@ -3,9 +3,9 @@ export const revalidate = 60;
 export default async function HabitsPage() {
   const habits = [
     'Exercise',
-    'Read 20 minutes',
-    'Code daily',
-    'Meditate',
+    'Read 30 minutes',
+    'Code everyday',
+    'Meditate everyday',
   ];
 
   return (
