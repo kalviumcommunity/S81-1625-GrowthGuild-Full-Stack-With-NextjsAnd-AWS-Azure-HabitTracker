@@ -1,8 +1,5 @@
 
-=======
-
-
-# Habit Tracker – Rendering Strategies in Next.js (App Router)
+# 1. Habit Tracker – Rendering Strategies in Next.js (App Router)
 
 This project demonstrates how Next.js App Router supports multiple rendering strategies — Static Site Generation (SSG), Server-Side Rendering (SSR), and Hybrid Rendering using Incremental Static Regeneration (ISR).
 
@@ -99,7 +96,7 @@ Choosing the correct rendering strategy is a critical architectural decision. St
 
 
 
-## Multi-Environment Deployment Setup
+## 2. Multi-Environment Deployment Setup
 
 This project is configured with three environments:
 - Development
@@ -132,44 +129,25 @@ Each build points to the correct backend and configuration.
 
 ### Reflection
 Multi-environment setups reduce deployment risk by isolating development, testing, and production. This prevents accidental production failures and improves CI/CD reliability by catching issues earlier in staging environments.
-=======
-=======
-# Habit-Tracker
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
-
-## Getting Started !!!!
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
 
+## 3. Cloud Deployment Overview
+
+This project demonstrates a modern cloud deployment workflow using Docker, CI/CD, and cloud platforms like AWS or Azure.
+
+### Docker
+The application is containerized using Docker to ensure consistency across development and production environments.
+
+### CI/CD Pipeline
+GitHub Actions is used to automate the build process whenever code is pushed to the main branch. This ensures early detection of build failures and enforces consistent deployments.
+
+### Cloud Deployment
+In a production setup, the Docker image would be pushed to a cloud container registry and deployed using AWS ECS or Azure App Service.
+
+### Benefits
+- Consistent environments using Docker
+- Automated builds with CI/CD
+- Scalable and reliable cloud hosting
+
+### Reflection
+Using Docker and CI/CD reduces deployment errors and enables faster iteration. Cloud platforms further improve scalability and availability, making this approach suitable for production-grade applications.
