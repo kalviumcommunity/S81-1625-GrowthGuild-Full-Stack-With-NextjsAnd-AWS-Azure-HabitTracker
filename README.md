@@ -1,4 +1,7 @@
 
+=======
+
+
 # Habit Tracker – Rendering Strategies in Next.js (App Router)
 
 This project demonstrates how Next.js App Router supports multiple rendering strategies — Static Site Generation (SSG), Server-Side Rendering (SSR), and Hybrid Rendering using Incremental Static Regeneration (ISR).
@@ -93,6 +96,43 @@ By using static caching and revalidation wisely, the application would handle hi
 ## Conclusion
 
 Choosing the correct rendering strategy is a critical architectural decision. Static rendering improves speed and scalability, SSR ensures accuracy, and ISR provides the best balance for production applications.
+
+
+
+## Multi-Environment Deployment Setup
+
+This project is configured with three environments:
+- Development
+- Staging
+- Production
+
+Each environment has its own configuration using environment variables.
+
+### Environment Files
+- `.env.development` → local development
+- `.env.staging` → staging deployment
+- `.env.production` → production deployment
+
+Only `.env.example` is committed to GitHub to prevent exposing sensitive data.
+
+### Secure Secret Management
+All real secrets such as database credentials and API URLs are stored securely using GitHub Secrets. These values are injected during build or runtime and are never hardcoded in the application.
+
+### Build Verification
+Separate build commands were used to verify each environment:
+- `npm run build:staging`
+- `npm run build:production`
+
+Each build points to the correct backend and configuration.
+
+### Security Measures
+- `.env` files are ignored via `.gitignore`
+- No secrets are committed to version control
+- Frontend access is limited to `NEXT_PUBLIC_*` variables only
+
+### Reflection
+Multi-environment setups reduce deployment risk by isolating development, testing, and production. This prevents accidental production failures and improves CI/CD reliability by catching issues earlier in staging environments.
+=======
 =======
 # Habit-Tracker
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
