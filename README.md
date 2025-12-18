@@ -1,4 +1,4 @@
-# Habit Tracker – Rendering Strategies in Next.js (App Router)
+# 1. Habit Tracker – Rendering Strategies in Next.js (App Router)
 
 This project demonstrates how Next.js App Router supports multiple rendering strategies — Static Site Generation (SSG), Server-Side Rendering (SSR), and Hybrid Rendering using Incremental Static Regeneration (ISR).
 
@@ -94,7 +94,7 @@ By using static caching and revalidation wisely, the application would handle hi
 Choosing the correct rendering strategy is a critical architectural decision. Static rendering improves speed and scalability, SSR ensures accuracy, and ISR provides the best balance for production applications.
 
 
-## Multi-Environment Deployment Setup
+## 2. Multi-Environment Deployment Setup
 
 This project is configured with three environments:
 - Development
@@ -127,3 +127,24 @@ Each build points to the correct backend and configuration.
 
 ### Reflection
 Multi-environment setups reduce deployment risk by isolating development, testing, and production. This prevents accidental production failures and improves CI/CD reliability by catching issues earlier in staging environments.
+
+## 3. Cloud Deployment Overview
+
+This project demonstrates a modern cloud deployment workflow using Docker, CI/CD, and cloud platforms like AWS or Azure.
+
+### Docker
+The application is containerized using Docker to ensure consistency across development and production environments.
+
+### CI/CD Pipeline
+GitHub Actions is used to automate the build process whenever code is pushed to the main branch. This ensures early detection of build failures and enforces consistent deployments.
+
+### Cloud Deployment
+In a production setup, the Docker image would be pushed to a cloud container registry and deployed using AWS ECS or Azure App Service.
+
+### Benefits
+- Consistent environments using Docker
+- Automated builds with CI/CD
+- Scalable and reliable cloud hosting
+
+### Reflection
+Using Docker and CI/CD reduces deployment errors and enables faster iteration. Cloud platforms further improve scalability and availability, making this approach suitable for production-grade applications.
