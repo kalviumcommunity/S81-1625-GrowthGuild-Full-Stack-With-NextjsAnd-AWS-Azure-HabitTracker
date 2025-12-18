@@ -1,3 +1,4 @@
+
 # 1. Habit Tracker – Rendering Strategies in Next.js (App Router)
 
 This project demonstrates how Next.js App Router supports multiple rendering strategies — Static Site Generation (SSG), Server-Side Rendering (SSR), and Hybrid Rendering using Incremental Static Regeneration (ISR).
@@ -94,6 +95,7 @@ By using static caching and revalidation wisely, the application would handle hi
 Choosing the correct rendering strategy is a critical architectural decision. Static rendering improves speed and scalability, SSR ensures accuracy, and ISR provides the best balance for production applications.
 
 
+
 ## 2. Multi-Environment Deployment Setup
 
 This project is configured with three environments:
@@ -127,6 +129,7 @@ Each build points to the correct backend and configuration.
 
 ### Reflection
 Multi-environment setups reduce deployment risk by isolating development, testing, and production. This prevents accidental production failures and improves CI/CD reliability by catching issues earlier in staging environments.
+
 
 ## 3. Cloud Deployment Overview
 
