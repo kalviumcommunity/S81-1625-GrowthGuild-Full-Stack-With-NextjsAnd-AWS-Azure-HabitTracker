@@ -151,3 +151,10 @@ In a production setup, the Docker image would be pushed to a cloud container reg
 
 ### Reflection
 Using Docker and CI/CD reduces deployment errors and enables faster iteration. Cloud platforms further improve scalability and availability, making this approach suitable for production-grade applications.
+
+### Environment Configuration
+
+Environment variables are managed using `.env` files located at the project root.  
+Only `.env.example` is committed to version control, while actual environment-specific files are ignored for security.
+
+This approach follows industry best practices and ensures safe configuration across development, staging, and production environments.
