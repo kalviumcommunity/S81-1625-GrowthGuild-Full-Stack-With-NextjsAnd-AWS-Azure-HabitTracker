@@ -1,7 +1,6 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  // Fake live data
   const data = {
     completedToday: 3,
     totalHabits: 5,
@@ -17,6 +16,3 @@ export default async function DashboardPage() {
     </div>
   );
 }
-
-
-// vdf
