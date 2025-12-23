@@ -159,7 +159,7 @@ Only `.env.example` is committed to version control, while actual environment-sp
 
 This approach follows industry best practices and ensures safe configuration across development, staging, and production environments.
 
-## 🧹 Code Quality & Consistency
+## 4 🧹 Code Quality & Consistency
 
 ### Strict TypeScript
 The project uses TypeScript strict mode to catch potential errors at compile time, such as implicit `any` types, unused variables, and casing mismatches. This reduces runtime bugs and improves reliability.
@@ -171,3 +171,34 @@ ESLint enforces best practices and Next.js standards, while Prettier ensures con
 Pre-commit hooks are configured using Husky and lint-staged to automatically run ESLint and Prettier on staged files. This guarantees that only clean, consistent code is committed to the repository.
 
 This setup improves maintainability, enforces team-wide coding standards, and supports scalable development.
+
+## 5 🔐 Environment Variables & Secrets Management
+
+This project uses environment variables to manage configuration securely.
+
+### Environment Files
+- `.env.local`: Stores real credentials and is ignored by Git.
+- `.env.example`: Template file listing all required variables with placeholder values.
+
+### Server-side Variables
+- `DATABASE_URL`
+  - Used for database connections
+  - Available only on the server
+  - Never exposed to the client
+
+### Client-side Variables
+- `NEXT_PUBLIC_API_BASE_URL`
+  - Safe to expose to the frontend
+  - Used for API requests
+- `NEXT_PUBLIC_APP_ENV`
+  - Indicates the current environment
+
+### Security Practices
+- Only variables prefixed with `NEXT_PUBLIC_` are accessible in client-side code.
+- `.env.local` is ignored using `.gitignore` to prevent accidental commits.
+- Sensitive variables are never accessed inside client components.
+
+### Setup Instructions
+To replicate the setup:
+1. Copy `.env.example` to `.env.local`
+2. Replace placeholder values with real credentials
