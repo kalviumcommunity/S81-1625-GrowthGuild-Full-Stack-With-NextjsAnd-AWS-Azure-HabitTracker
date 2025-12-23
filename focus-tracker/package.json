@@ -9,7 +9,8 @@
     "build:staging": "cross-env NODE_ENV=staging next build",
     "build:production": "cross-env NODE_ENV=production next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "prepare": "husky install"
   },
   "dependencies": {
     "next": "16.0.10",
@@ -21,9 +22,20 @@
     "@types/node": "^25.0.3",
     "@types/react": "^19.2.7",
     "babel-plugin-react-compiler": "1.0.0",
-    "eslint": "^9",
-    "eslint-config-next": "16.0.10",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "^16.1.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "husky": "^8.0.3",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.7.4",
     "tailwindcss": "^4",
     "typescript": "^5.9.3"
-  }
+},
+"lint-staged": {
+  "*.{ts,tsx,js,jsx}": [
+    "npx eslint --fix",
+    "npx prettier --write"
+  ]
+}
 }
