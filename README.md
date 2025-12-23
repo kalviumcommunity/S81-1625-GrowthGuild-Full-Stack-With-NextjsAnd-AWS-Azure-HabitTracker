@@ -158,3 +158,16 @@ Environment variables are managed using `.env` files located at the project root
 Only `.env.example` is committed to version control, while actual environment-specific files are ignored for security.
 
 This approach follows industry best practices and ensures safe configuration across development, staging, and production environments.
+
+## 🧹 Code Quality & Consistency
+
+### Strict TypeScript
+The project uses TypeScript strict mode to catch potential errors at compile time, such as implicit `any` types, unused variables, and casing mismatches. This reduces runtime bugs and improves reliability.
+
+### ESLint & Prettier
+ESLint enforces best practices and Next.js standards, while Prettier ensures consistent code formatting across the codebase. Conflicting rules are disabled to allow seamless integration.
+
+### Pre-Commit Hooks
+Pre-commit hooks are configured using Husky and lint-staged to automatically run ESLint and Prettier on staged files. This guarantees that only clean, consistent code is committed to the repository.
+
+This setup improves maintainability, enforces team-wide coding standards, and supports scalable development.
