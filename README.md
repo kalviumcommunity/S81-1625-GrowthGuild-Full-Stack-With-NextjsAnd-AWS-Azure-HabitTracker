@@ -202,3 +202,34 @@ This project uses environment variables to manage configuration securely.
 To replicate the setup:
 1. Copy `.env.example` to `.env.local`
 2. Replace placeholder values with real credentials
+
+
+## 6 🌿 Branching & Pull Request Workflow
+
+### Branch Naming Convention
+We follow a consistent branch naming strategy:
+- `feature/<feature-name>`
+- `fix/<bug-name>`
+- `chore/<task-name>`
+- `docs/<update-name>`
+
+This improves clarity, traceability, and collaboration.
+
+### Pull Request Template
+All PRs use a standardized template to clearly communicate intent, changes, and validation steps.
+
+### Code Review Process
+Every PR is reviewed using a checklist covering:
+- Code quality
+- Functionality
+- Linting and formatting
+- Security and secret management
+
+### Branch Protection
+The `main` branch is protected with:
+- Mandatory pull request reviews
+- Required status checks
+- Disabled direct pushes
+
+### Reflection
+This workflow ensures consistent code quality, prevents accidental breaking changes, and enables faster, safer collaboration within the team.
