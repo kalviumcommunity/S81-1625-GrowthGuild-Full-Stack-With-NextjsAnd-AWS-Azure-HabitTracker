@@ -13,6 +13,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@prisma/client": "^7.2.0",
     "next": "16.0.10",
     "react": "19.2.1",
     "react-dom": "19.2.1"
@@ -29,13 +30,14 @@
     "husky": "^8.0.3",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
+    "prisma": "^6.19.1",
     "tailwindcss": "^4",
     "typescript": "^5.9.3"
-},
-"lint-staged": {
-  "*.{ts,tsx,js,jsx}": [
-    "npx eslint --fix",
-    "npx prettier --write"
-  ]
-}
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "npx eslint --fix",
+      "npx prettier --write"
+    ]
+  }
 }

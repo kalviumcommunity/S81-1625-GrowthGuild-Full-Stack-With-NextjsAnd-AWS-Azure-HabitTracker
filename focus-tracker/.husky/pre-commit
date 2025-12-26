@@ -1,0 +1,6 @@
+#!/bin/sh
+
+echo "Running lint-staged with ESLint + Prettier..."
+
+cd focus-tracker || exit 1
+npx lint-staged
