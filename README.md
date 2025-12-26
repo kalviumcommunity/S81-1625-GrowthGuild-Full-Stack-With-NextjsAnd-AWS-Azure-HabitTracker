@@ -233,3 +233,56 @@ The `main` branch is protected with:
 
 ### Reflection
 This workflow ensures consistent code quality, prevents accidental breaking changes, and enables faster, safer collaboration within the team.
+
+## 7 🐳 Docker & Docker Compose Setup
+
+### Dockerfile
+The Dockerfile containerizes the Next.js application by installing dependencies, building the app, and running it in production mode.
+
+### Docker Compose Services
+- **app**: Next.js frontend application
+- **db**: PostgreSQL database with persistent volume
+- **redis**: Redis cache for fast in-memory access
+
+### Networking
+All services run in a shared Docker bridge network (`localnet`), enabling container-to-container communication using service names.
+
+### Volumes
+PostgreSQL data is persisted using a named Docker volume to prevent data loss on container restarts.
+
+### Environment Variables
+Service configuration is injected via environment variables, ensuring no secrets are hardcoded.
+
+### Verification
+All containers were successfully built and run using Docker Compose, and the application was accessible at `http://localhost:3000`.
+
+### Reflection
+During setup, common issues such as port conflicts and dependency installation delays were resolved by adjusting service ports and using lightweight Alpine images.
+
+## 8 🗄️ Database Design & Normalization
+
+### Core Entities
+- **User**: Represents a registered user
+- **Habit**: Represents a habit created by a user
+- **HabitLog**: Tracks daily habit completion
+
+### Relationships
+- One User → Many Habits
+- One Habit → Many HabitLogs
+
+### Constraints & Integrity
+- Unique email per user
+- Unique habit log per day
+- Cascading deletes maintain data consistency
+
+### Normalization
+The schema follows 1NF, 2NF, and 3NF to eliminate redundancy and ensure data integrity.
+
+### Scalability
+This design supports:
+- Fast lookups via indexed columns
+- Easy extension (streaks, reminders, analytics)
+- Efficient querying for dashboards and reports
+
+### Verification
+Database migrations were applied successfully and verified using Prisma Studio with seeded test data.
