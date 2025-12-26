@@ -1,23 +1,21 @@
-# Use Node 20 for Next.js 16
+# Use official Node.js image
 FROM node:20-alpine
 
+# Set working directory
 WORKDIR /app
 
-# Accept build-time variables
-ARG NEXT_PUBLIC_APP_ENV
-ARG NEXT_PUBLIC_API_URL
-
-# Make them available during build
-ENV NEXT_PUBLIC_APP_ENV=$NEXT_PUBLIC_APP_ENV
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-
+# Copy package files and install dependencies
 COPY package*.json ./
 RUN npm install
 
+# Copy the rest of the project files
 COPY . .
 
-# Build with env available
+# Build the Next.js app
 RUN npm run build
 
+# Expose the Next.js port
 EXPOSE 3000
-CMD ["npm", "start"]
+
+# Start the app
+CMD ["npm", "run", "start"]
