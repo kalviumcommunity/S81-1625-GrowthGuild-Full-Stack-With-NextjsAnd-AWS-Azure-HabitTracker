@@ -286,3 +286,18 @@ This design supports:
 
 ### Verification
 Database migrations were applied successfully and verified using Prisma Studio with seeded test data.
+
+## 9 Prisma ORM Integration
+
+### Why Prisma
+Prisma ORM provides a type-safe and developer-friendly way to interact with the PostgreSQL database. It auto-generates a client based on the schema, reducing runtime errors and improving productivity.
+
+### Setup Steps
+- Installed Prisma and initialized the `/prisma` folder
+- Defined normalized data models for User, Habit, and HabitLog
+- Generated Prisma Client using `npx prisma generate`
+- Integrated Prisma into the Next.js app using a singleton client
+
+### Prisma Client Initialization
+```ts
+import { PrismaClient } from "@prisma/client";
