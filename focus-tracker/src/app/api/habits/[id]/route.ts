@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 // GET /api/habits/:id
 export async function GET(
-  req: Request,
+  _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -36,7 +36,7 @@ export async function PUT(
 
 // DELETE /api/habits/:id
 export async function DELETE(
-  req: Request,
+  _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
