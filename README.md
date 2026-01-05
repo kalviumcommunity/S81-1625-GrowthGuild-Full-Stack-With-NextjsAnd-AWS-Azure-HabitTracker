@@ -317,3 +317,20 @@ Each migration generates SQL files inside `prisma/migrations/`.
 A seed script (`prisma/seed.ts`) inserts initial test data using idempotent logic (`upsert`) to avoid duplication.
 
 Run:
+
+## 11 Transactions & Query Optimization
+
+### Transactions
+A Prisma transaction was used to create a Habit and its first HabitLog together. If any step fails, Prisma automatically rolls back the entire operation.
+
+### Rollback Verification
+An intentional error was introduced to confirm rollback behavior. Prisma ensured no partial data was written to the database.
+
+### Indexes
+Indexes were added on frequently queried fields such as `userId`, `habitId`, and `date` to improve query performance.
+
+### Optimization
+Queries were optimized using `select` to avoid over-fetching and pagination techniques for large datasets.
+
+### Reflection
+Transactions ensure data integrity, while indexes and optimized queries improve performance as data scales.
