@@ -1,6 +1,8 @@
+import { transactionDemo } from "@/lib/transactions";
 
+export default async function HomePage() {
+  await transactionDemo();
 
-export default function HomePage() {
   return (
     <div>
       <h1 className="text-2xl font-bold">Habit Tracker</h1>
