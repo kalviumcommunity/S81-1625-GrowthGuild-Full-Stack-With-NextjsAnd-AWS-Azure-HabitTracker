@@ -334,3 +334,28 @@ Queries were optimized using `select` to avoid over-fetching and pagination tech
 
 ### Reflection
 Transactions ensure data integrity, while indexes and optimized queries improve performance as data scales.
+
+## 12 RESTful API Design
+
+### API Route Hierarchy
+- GET /api/users
+- POST /api/users
+- GET /api/habits
+- POST /api/habits
+- GET /api/habits/:id
+- PUT /api/habits/:id
+- DELETE /api/habits/:id
+
+### Naming Conventions
+- Used plural nouns
+- Lowercase paths
+- Resource-based URLs
+
+### Pagination
+Pagination implemented using page and limit query parameters.
+
+### Error Handling
+Meaningful HTTP status codes (200, 201, 400, 404, 500) are returned for all responses.
+
+### Reflection
+Consistent route naming and status codes make APIs predictable, easier to debug, and simpler for frontend integration.
