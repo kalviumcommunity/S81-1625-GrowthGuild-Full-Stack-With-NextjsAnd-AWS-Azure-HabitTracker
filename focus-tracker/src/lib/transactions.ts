@@ -29,6 +29,7 @@ export async function transactionDemo() {
 
     console.log("✅ Transaction success:", result);
   } catch (error) {
-    console.error("❌ Transaction failed. Rolled back.", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("❌ Transaction failed. Rolled back.", message);
   }
 }
