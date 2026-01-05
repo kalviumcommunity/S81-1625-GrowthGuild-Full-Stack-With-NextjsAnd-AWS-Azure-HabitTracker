@@ -3,8 +3,10 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  const user = await prisma.user.create({
-    data: {
+  await prisma.user.upsert({
+    where: { email: "demo@habit.com" },
+    update: {},
+    create: {
       name: "Demo User",
       email: "demo@habit.com",
       habits: {
@@ -12,21 +14,17 @@ async function main() {
           {
             title: "Daily Coding",
             frequency: "daily",
-            logs: {
-              create: {
-                date: new Date(),
-                completed: true,
-              },
-            },
           },
         ],
       },
     },
   });
 
-  console.log("Seeded user:", user);
+  console.log("Seed data inserted successfully");
 }
 
 main()
   .catch(console.error)
-  .finally(() => prisma.$disconnect());
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

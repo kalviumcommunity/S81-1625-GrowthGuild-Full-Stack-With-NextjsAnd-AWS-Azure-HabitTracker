@@ -301,3 +301,19 @@ Prisma ORM provides a type-safe and developer-friendly way to interact with the 
 ### Prisma Client Initialization
 ```ts
 import { PrismaClient } from "@prisma/client";
+
+## 10  Database Migrations & Seeding
+
+### Migrations Workflow
+Prisma migrations are used to version and apply schema changes consistently.
+
+Commands used:
+- `npx prisma migrate dev` – create and apply migrations
+- `npx prisma migrate reset` – reset database and reapply all migrations
+
+Each migration generates SQL files inside `prisma/migrations/`.
+
+### Seed Script
+A seed script (`prisma/seed.ts`) inserts initial test data using idempotent logic (`upsert`) to avoid duplication.
+
+Run:

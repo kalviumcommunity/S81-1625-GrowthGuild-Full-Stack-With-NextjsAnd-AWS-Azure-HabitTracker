@@ -23,6 +23,7 @@ model Habit {
   title       String
   description String?
   frequency   String     // daily, weekly, etc.
+  isActive    Boolean    @default(true)
   createdAt   DateTime   @default(now())
 
   userId      Int
