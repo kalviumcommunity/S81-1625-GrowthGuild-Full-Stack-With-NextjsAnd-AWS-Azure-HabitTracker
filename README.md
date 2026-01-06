@@ -461,3 +461,30 @@ secure, and observable error management across the application.
 - API routes use `handleError()` in catch blocks
 
 This design ensures the app fails gracefully while remaining secure and debuggable.
+
+
+## 17 Redis Caching Layer
+
+We integrated Redis as a caching layer to reduce API latency and database load.
+
+### Cache Strategy
+- Pattern: Cache-Aside (Lazy Loading)
+- First request → DB → Cache
+- Subsequent requests → Redis
+
+### Cached Endpoint
+- GET /api/users
+- TTL: 60 seconds
+
+### Cache Invalidation
+- Cache key `users:list` is cleared on user signup/update
+- Prevents stale data
+
+### Observations
+- Cold request hits database
+- Cached request served instantly
+- Latency reduced significantly
+
+### Risks & Mitigation
+- Stale data risk handled using TTL + invalidation
+- Cache is cleared on write operations
