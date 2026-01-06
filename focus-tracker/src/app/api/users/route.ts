@@ -1,8 +1,10 @@
-import { NextResponse } from "next/server";
+import { handleError } from "@/lib/errorHandler";
 
 export async function GET() {
-  return NextResponse.json({
-    success: true,
-    message: "User route accessible to authenticated users",
-  });
+  try {
+    // Simulate failure
+    throw new Error("Database connection failed!");
+  } catch (error) {
+    return handleError(error, "GET /api/users");
+  }
 }
