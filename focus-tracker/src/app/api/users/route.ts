@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { sendSuccess, sendError } from "@/lib/responseHandler";
 import { ERROR_CODES } from "@/lib/errorCodes";
+import { userSchema } from "@/lib/schemas/userSchema";
+import { ZodError } from "zod";
 
 // GET /api/users
 export async function GET() {
@@ -26,40 +28,33 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    if (!body.name || !body.email) {
-      return sendError(
-        "Name and email are required",
-        ERROR_CODES.VALIDATION_ERROR,
-        400
-      );
-    }
+    // ✅ Zod validation
+    const validatedData = userSchema.parse(body);
 
     const user = await prisma.user.create({
-      data: {
-        name: body.name,
-        email: body.email,
-      },
+      data: validatedData,
     });
 
     return sendSuccess(user, "User created successfully", 201);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-
-    // Handle unique constraint error (duplicate email)
-    if (message.includes("Unique constraint")) {
+    // ❌ Validation error
+    if (error instanceof ZodError) {
       return sendError(
-        "Email already exists",
+        "Validation Error",
         ERROR_CODES.VALIDATION_ERROR,
         400,
-        message
+        error.issues.map((e) => ({
+          field: e.path[0],
+          message: e.message,
+        }))
       );
     }
 
+    // ❌ Other errors
     return sendError(
       "User creation failed",
       ERROR_CODES.DATABASE_ERROR,
-      500,
-      message
+      500
     );
   }
 }

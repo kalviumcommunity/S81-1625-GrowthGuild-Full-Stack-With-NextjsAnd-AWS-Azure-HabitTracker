@@ -359,3 +359,28 @@ Meaningful HTTP status codes (200, 201, 400, 404, 500) are returned for all resp
 
 ### Reflection
 Consistent route naming and status codes make APIs predictable, easier to debug, and simpler for frontend integration.
+
+## 13 Global API Response Handler
+
+### Unified Response Format
+All API endpoints return a consistent JSON structure with success status, message, timestamp, and optional data or error details.
+
+### Success Response
+```json
+{
+  "success": true,
+  "message": "User created successfully",
+  "data": { "id": 1, "name": "Alice" },
+  "timestamp": "2025-01-05T10:00:00Z"
+}
+
+## 14 Input Validation with Zod
+
+### Schema Definition
+Zod schemas are used to validate incoming API requests before they reach database logic.
+
+```ts
+const userSchema = z.object({
+  name: z.string().min(2),
+  email: z.string().email(),
+});
