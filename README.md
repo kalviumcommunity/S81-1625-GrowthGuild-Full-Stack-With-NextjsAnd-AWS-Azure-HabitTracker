@@ -414,3 +414,25 @@ Authorization: Bearer <JWT_TOKEN>
   "message": "Login successful",
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
+
+## 16 Authorization & RBAC Middleware
+
+We implemented a centralized authorization middleware using Next.js middleware.
+
+### How it works
+1. Middleware intercepts protected API routes
+2. JWT is extracted and verified
+3. User role is checked
+4. Access is allowed or denied based on least-privilege
+
+### Protected Routes
+- /api/users → any authenticated user
+- /api/admin → admin users only
+
+### Security Principles
+- JWT-based session validation
+- Role-Based Access Control (RBAC)
+- Least privilege enforcement
+- Centralized authorization logic
+
+This design scales easily for future roles like editor or moderator.
