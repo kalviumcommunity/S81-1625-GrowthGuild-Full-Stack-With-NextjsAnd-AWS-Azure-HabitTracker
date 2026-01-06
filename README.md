@@ -384,3 +384,33 @@ const userSchema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
 });
+
+## 15 Authentication (bcrypt + JWT)
+
+### Signup Flow
+1. User submits name, email, password
+2. Password is hashed using bcrypt
+3. Hashed password stored in PostgreSQL via Prisma
+
+### Login Flow
+1. User submits email & password
+2. Password verified using bcrypt.compare
+3. JWT token issued (1 hour expiry)
+
+### Protected Routes
+Routes under `/api/users` require:
+Authorization: Bearer <JWT_TOKEN>
+
+### Security Decisions
+- Passwords never stored in plain text
+- JWT expiry set to 1 hour
+- Secret stored in environment variables
+- Tokens intended for HttpOnly cookies in production
+
+### Sample Success Response
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
