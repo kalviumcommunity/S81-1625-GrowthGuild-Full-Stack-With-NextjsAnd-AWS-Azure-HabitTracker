@@ -436,3 +436,28 @@ We implemented a centralized authorization middleware using Next.js middleware.
 - Centralized authorization logic
 
 This design scales easily for future roles like editor or moderator.
+
+## 17 Centralized Error Handling
+
+We implemented a centralized error handling system to ensure consistent,
+secure, and observable error management across the application.
+
+### Why Centralized Errors
+- Prevents scattered try/catch logic
+- Ensures consistent API responses
+- Improves debugging and monitoring
+- Protects sensitive stack traces in production
+
+### Behavior by Environment
+
+| Environment | Client Response | Logs |
+|------------|----------------|------|
+| Development | Full error + stack trace | Full logs |
+| Production | Generic safe message | Redacted stack |
+
+### Key Files
+- `lib/logger.ts` – structured logging
+- `lib/errorHandler.ts` – centralized error formatting
+- API routes use `handleError()` in catch blocks
+
+This design ensures the app fails gracefully while remaining secure and debuggable.
