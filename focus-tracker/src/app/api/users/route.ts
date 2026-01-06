@@ -1,60 +1,31 @@
-import { prisma } from "@/lib/prisma";
-import { sendSuccess, sendError } from "@/lib/responseHandler";
-import { ERROR_CODES } from "@/lib/errorCodes";
-import { userSchema } from "@/lib/schemas/userSchema";
-import { ZodError } from "zod";
+import { NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
 
-// GET /api/users
-export async function GET() {
+const JWT_SECRET = process.env.JWT_SECRET!;
+
+export async function GET(req: Request) {
   try {
-    const users = await prisma.user.findMany({
-      select: { id: true, name: true, email: true },
-    });
+    const authHeader = req.headers.get("authorization");
 
-    return sendSuccess(users, "Users fetched successfully");
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return sendError(
-      "Failed to fetch users",
-      ERROR_CODES.DATABASE_ERROR,
-      500,
-      message
-    );
-  }
-}
-
-// POST /api/users
-export async function POST(req: Request) {
-  try {
-    const body = await req.json();
-
-    // ✅ Zod validation
-    const validatedData = userSchema.parse(body);
-
-    const user = await prisma.user.create({
-      data: validatedData,
-    });
-
-    return sendSuccess(user, "User created successfully", 201);
-  } catch (error) {
-    // ❌ Validation error
-    if (error instanceof ZodError) {
-      return sendError(
-        "Validation Error",
-        ERROR_CODES.VALIDATION_ERROR,
-        400,
-        error.issues.map((e) => ({
-          field: e.path[0],
-          message: e.message,
-        }))
+    if (!authHeader) {
+      return NextResponse.json(
+        { success: false, message: "Token missing" },
+        { status: 401 }
       );
     }
 
-    // ❌ Other errors
-    return sendError(
-      "User creation failed",
-      ERROR_CODES.DATABASE_ERROR,
-      500
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    return NextResponse.json({
+      success: true,
+      message: "Protected route accessed",
+      user: decoded,
+    });
+  } catch {
+    return NextResponse.json(
+      { success: false, message: "Invalid or expired token" },
+      { status: 403 }
     );
   }
 }
