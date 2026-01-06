@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { prisma } from "@/lib/prisma";
+import redis from "@/lib/redis";
+
+// after prisma.user.create(...)
+await redis.del("users:list");
+
 
 export async function POST(req: Request) {
   try {
