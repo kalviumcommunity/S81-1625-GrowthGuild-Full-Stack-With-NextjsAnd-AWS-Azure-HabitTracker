@@ -16,6 +16,7 @@ model User {
   createdAt DateTime   @default(now())
 
   habits    Habit[]
+  files     File[]
 
   @@index([email])
 }
@@ -46,4 +47,19 @@ model HabitLog {
 
   @@unique([habitId, date])
   @@index([date])
+}
+
+model File {
+  id          Int      @id @default(autoincrement())
+  name        String
+  key         String   @unique  // S3 object key
+  url         String
+  fileType    String
+  size        Int?
+  uploadedBy  Int?
+  user        User?    @relation(fields: [uploadedBy], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  @@index([uploadedBy])
+  @@index([createdAt])
 }
