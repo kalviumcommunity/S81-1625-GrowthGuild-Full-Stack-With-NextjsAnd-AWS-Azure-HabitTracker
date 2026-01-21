@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { prisma } from "@/lib/prisma";
-import redis from "@/lib/redis";
-
-// after prisma.user.create(...)
-await redis.del("users:list");
-
+import { safeRedisDel } from "@/lib/redis";
 
 export async function POST(req: Request) {
   try {
@@ -43,6 +39,9 @@ export async function POST(req: Request) {
         email: true,
       },
     });
+
+    // Clear cached users list (silently fails if Redis unavailable)
+    await safeRedisDel("users:list");
 
     return NextResponse.json({
       success: true,
