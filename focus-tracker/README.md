@@ -1,6 +1,6 @@
 # 🎯 HabitFlow - Full-Stack Habit Tracker
 
-A modern, full-stack habit tracking application built with Next.js 15, TypeScript, Prisma, and PostgreSQL. Features secure authentication, real-time updates, and cloud file uploads using AWS S3 pre-signed URLs.
+A modern, full-stack habit tracking application built with Next.js 15, TypeScript, Prisma, and PostgreSQL. Features secure authentication, real-time updates, cloud file uploads using AWS S3 pre-signed URLs, and transactional emails via AWS SES.
 
 ## 🚀 Features
 
@@ -8,6 +8,7 @@ A modern, full-stack habit tracking application built with Next.js 15, TypeScrip
 - **Habit Management** - Create, update, delete, and track daily habits
 - **Dashboard Analytics** - Visual progress tracking and statistics
 - **Cloud File Uploads** - Secure file uploads using AWS S3 pre-signed URLs
+- **Transactional Emails** - Welcome emails, password resets, and notifications via AWS SES
 - **Redis Caching** - Optional Redis caching for improved performance
 - **Modern UI** - Responsive design with Tailwind CSS and glass-morphism effects
 
@@ -25,6 +26,7 @@ focus-tracker/
 │   │   │   ├── habits/      # Habit CRUD operations
 │   │   │   ├── upload/      # Pre-signed URL generation
 │   │   │   ├── files/       # File metadata storage
+│   │   │   ├── email/       # Transactional email API
 │   │   │   └── users/       # User management
 │   │   ├── dashboard/       # User dashboard
 │   │   ├── habits/          # Habits page
@@ -40,7 +42,9 @@ focus-tracker/
 │   └── lib/
 │       ├── prisma.ts        # Database client
 │       ├── redis.ts         # Redis client (optional)
-│       └── s3.ts            # AWS S3 utilities
+│       ├── s3.ts            # AWS S3 utilities
+│       ├── email.ts         # AWS SES email client
+│       └── emailTemplates.ts # HTML email templates
 └── .env.example             # Environment template
 ```
 
@@ -309,6 +313,160 @@ model File {
 
 ---
 
+## � Transactional Emails with AWS SES
+
+### Why Transactional Emails Matter
+
+Transactional emails are trigger-based notifications sent automatically by your backend:
+
+| Event | Email Type |
+|-------|------------|
+| User signs up | Welcome email |
+| Password reset request | Reset link |
+| Habit streak milestone | Streak notification |
+| Account activity | Security alert |
+
+### Email Flow Diagram
+
+```
+┌─────────────┐     1. User Action       ┌─────────────┐
+│   Client    │ ──────────────────────► │   Server    │
+│  (Browser)  │                         │  (Next.js)  │
+└─────────────┘                         └─────────────┘
+                                               │
+                                               │ 2. Trigger Email
+                                               │    (non-blocking)
+                                               ▼
+                                        ┌─────────────┐
+                                        │   AWS SES   │
+                                        │   Service   │
+                                        └─────────────┘
+                                               │
+                                               │ 3. Deliver Email
+                                               ▼
+                                        ┌─────────────┐
+                                        │   User's    │
+                                        │   Inbox     │
+                                        └─────────────┘
+```
+
+### Email API Endpoints
+
+#### Check Configuration
+```http
+GET /api/email
+```
+**Response:**
+```json
+{
+  "success": true,
+  "configured": true,
+  "provider": "AWS SES"
+}
+```
+
+#### Send Email with Template
+```http
+POST /api/email
+Content-Type: application/json
+
+{
+  "to": "user@example.com",
+  "template": "welcome",
+  "templateData": {
+    "userName": "John"
+  }
+}
+```
+
+#### Available Templates
+
+| Template | Required Data | Description |
+|----------|---------------|-------------|
+| `welcome` | `userName` | Welcome email after signup |
+| `password-reset` | `userName`, `resetToken` | Password reset link |
+| `streak` | `userName`, `habitName`, `streakDays` | Habit streak celebration |
+| `activity-alert` | `userName`, `activityType`, `details` | Security notification |
+| `notification` | `userName`, `title`, `message`, `ctaText?`, `ctaUrl?` | Generic notification |
+
+#### Send Raw Email
+```http
+POST /api/email
+Content-Type: application/json
+
+{
+  "to": "user@example.com",
+  "subject": "Hello!",
+  "message": "<h1>Welcome</h1><p>This is a test email.</p>"
+}
+```
+
+### AWS SES Setup
+
+1. **Verify Email/Domain** in AWS SES Console
+   - Go to SES → Verified identities → Create identity
+   - Verify your sender email or domain
+
+2. **Request Production Access** (for sandbox exit)
+   - In sandbox mode, you can only send to verified emails
+   - Request production access for unrestricted sending
+
+3. **Add to .env:**
+   ```env
+   AWS_ACCESS_KEY_ID=your-access-key
+   AWS_SECRET_ACCESS_KEY=your-secret-key
+   AWS_REGION=ap-south-1
+   SES_EMAIL_SENDER=no-reply@yourdomain.com
+   ```
+
+### Testing Email Sending
+
+**Using cURL:**
+```bash
+curl -X POST http://localhost:3000/api/email \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to": "your-verified-email@example.com",
+    "template": "welcome",
+    "templateData": { "userName": "Test User" }
+  }'
+```
+
+**Expected Response:**
+```json
+{
+  "success": true,
+  "message": "Email sent successfully",
+  "messageId": "01010189b2example123"
+}
+```
+
+**Console Log:**
+```
+✅ Email sent successfully: 01010189b2example123
+```
+
+### Email Security & Best Practices
+
+| Concern | Solution |
+|---------|----------|
+| **Sandbox Mode** | Only verified emails receive messages; request production access |
+| **Rate Limits** | SES: 1 email/sec (sandbox), 14/sec (production) - implement queuing |
+| **Bounces** | Monitor SES dashboard; handle bounces to protect sender reputation |
+| **Spam Compliance** | Include unsubscribe link; authenticate with SPF/DKIM |
+| **Non-blocking** | Send emails asynchronously; don't block user actions |
+
+### Sandbox vs Production
+
+| Feature | Sandbox | Production |
+|---------|---------|------------|
+| Recipients | Verified only | Anyone |
+| Daily limit | 200 emails | Based on quota |
+| Rate limit | 1/second | 14/second |
+| Setup | Automatic | Requires approval |
+
+---
+
 ## 🚀 Deployment
 
 ### Environment Variables Required
@@ -320,6 +478,7 @@ AWS_ACCESS_KEY_ID=...
 AWS_SECRET_ACCESS_KEY=...
 AWS_REGION=ap-south-1
 AWS_BUCKET_NAME=your-bucket
+SES_EMAIL_SENDER=no-reply@yourdomain.com
 ```
 
 ### Deploy to Vercel
@@ -334,6 +493,7 @@ vercel --prod
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Prisma Documentation](https://www.prisma.io/docs)
 - [AWS S3 Pre-Signed URLs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html)
+- [AWS SES Developer Guide](https://docs.aws.amazon.com/ses/latest/dg/Welcome.html)
 - [Tailwind CSS](https://tailwindcss.com/docs)
 
 ---
