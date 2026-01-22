@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { prisma } from "@/lib/prisma";
 import { safeRedisDel } from "@/lib/redis";
+import { sendEmail, isSESConfigured } from "@/lib/email";
+import { welcomeEmailTemplate } from "@/lib/emailTemplates";
 
 export async function POST(req: Request) {
   try {
@@ -42,6 +44,19 @@ export async function POST(req: Request) {
 
     // Clear cached users list (silently fails if Redis unavailable)
     await safeRedisDel("users:list");
+
+    // Send welcome email (non-blocking, don't fail signup if email fails)
+    if (isSESConfigured()) {
+      const welcomeEmail = welcomeEmailTemplate(name);
+      sendEmail({
+        to: email,
+        subject: welcomeEmail.subject,
+        html: welcomeEmail.html,
+        text: welcomeEmail.text,
+      }).catch((err) => {
+        console.error("Failed to send welcome email:", err);
+      });
+    }
 
     return NextResponse.json({
       success: true,
