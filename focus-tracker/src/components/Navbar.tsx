@@ -27,6 +27,7 @@ export default function Navbar() {
               <>
                 <NavLink href="/dashboard" icon="📊">Dashboard</NavLink>
                 <NavLink href="/habits" icon="🎯">Habits</NavLink>
+                <NavLink href="/users" icon="👥">Users</NavLink>
                 <NavLink href="/uploads" icon="☁️">Uploads</NavLink>
               </>
             )}

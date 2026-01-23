@@ -11,6 +11,132 @@ A modern, full-stack habit tracking application built with Next.js 15, TypeScrip
 - **Transactional Emails** - Welcome emails, password resets, and notifications via AWS SES
 - **Redis Caching** - Optional Redis caching for improved performance
 - **Modern UI** - Responsive design with Tailwind CSS and glass-morphism effects
+- **App Router** - Next.js 13+ file-based routing with dynamic routes
+
+---
+
+## 🛣️ Routing Architecture
+
+### Route Map
+
+```
+app/
+├── page.tsx               → / (Home - Public)
+├── login/
+│   └── page.tsx           → /login (Public)
+├── signup/
+│   └── page.tsx           → /signup (Public)
+├── about/
+│   └── page.tsx           → /about (Public)
+├── dashboard/
+│   └── page.tsx           → /dashboard (Protected)
+├── habits/
+│   └── page.tsx           → /habits (Protected)
+├── users/
+│   ├── page.tsx           → /users (Protected - List all users)
+│   └── [id]/
+│       └── page.tsx       → /users/:id (Protected - Dynamic route)
+├── uploads/
+│   └── page.tsx           → /uploads (Protected)
+├── not-found.tsx          → Custom 404 page
+├── error.tsx              → Error boundary
+├── layout.tsx             → Root layout with Navbar
+└── middleware.ts          → Route protection
+```
+
+### Route Types
+
+| Route | Type | Description |
+|-------|------|-------------|
+| `/` | Public | Landing page with features showcase |
+| `/login` | Public | User authentication |
+| `/signup` | Public | New user registration |
+| `/about` | Public | About the application |
+| `/dashboard` | Protected | User's habit tracking dashboard |
+| `/habits` | Protected | Manage personal habits |
+| `/users` | Protected | Browse all users directory |
+| `/users/[id]` | Protected + Dynamic | View individual user profiles |
+| `/uploads` | Protected | File upload management |
+
+### Key Routing Concepts
+
+#### 1. File-Based Routing
+```
+app/
+├── page.tsx          → Defines route at /
+├── users/
+│   └── page.tsx      → Defines route at /users
+```
+
+#### 2. Dynamic Routes
+```
+app/users/[id]/page.tsx → Matches /users/1, /users/42, etc.
+```
+
+The `[id]` folder creates a dynamic segment that captures any value.
+
+#### 3. Layout Wrapping
+```tsx
+// app/layout.tsx wraps ALL pages with shared UI
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <Navbar />
+        {children}
+        <Footer />
+      </body>
+    </html>
+  );
+}
+```
+
+#### 4. Middleware Protection
+```typescript
+// middleware.ts
+export function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+  
+  // Public routes bypass auth
+  if (["/", "/login", "/signup", "/about"].includes(pathname)) {
+    return NextResponse.next();
+  }
+  
+  // Protected routes check for JWT
+  // Client-side: ProtectedRoute component
+  // API: Authorization header validation
+}
+```
+
+### Breadcrumbs Navigation
+
+Dynamic breadcrumbs are implemented for SEO and UX:
+
+```tsx
+// Example: /users/42 shows:
+// Home > Users > John Doe
+<Breadcrumbs items={[
+  { label: "Home", href: "/" },
+  { label: "Users", href: "/users" },
+  { label: "John Doe", href: "/users/42" },
+]} />
+```
+
+### Error Handling
+
+| File | Purpose |
+|------|---------|
+| `not-found.tsx` | Custom 404 page for missing routes |
+| `error.tsx` | Error boundary for runtime errors |
+
+### SEO Benefits
+
+1. **Clean URLs** - `/users/42` instead of `/users?id=42`
+2. **Semantic Structure** - Route hierarchy reflects content hierarchy
+3. **Breadcrumbs** - Schema.org structured data for search engines
+4. **Static Metadata** - Each page can define its own meta tags
+
+---
 
 ## 📁 Project Structure
 
@@ -24,17 +150,25 @@ focus-tracker/
 │   │   ├── api/
 │   │   │   ├── auth/        # Login & Signup endpoints
 │   │   │   ├── habits/      # Habit CRUD operations
+│   │   │   ├── dashboard/   # Dashboard stats API
 │   │   │   ├── upload/      # Pre-signed URL generation
 │   │   │   ├── files/       # File metadata storage
 │   │   │   ├── email/       # Transactional email API
 │   │   │   └── users/       # User management
-│   │   ├── dashboard/       # User dashboard
-│   │   ├── habits/          # Habits page
-│   │   ├── uploads/         # File uploads page
-│   │   ├── login/           # Login page
-│   │   └── signup/          # Signup page
+│   │   ├── dashboard/       # User dashboard (Protected)
+│   │   ├── habits/          # Habits page (Protected)
+│   │   ├── users/           # Users list (Protected)
+│   │   │   └── [id]/        # Dynamic user profile
+│   │   ├── uploads/         # File uploads page (Protected)
+│   │   ├── login/           # Login page (Public)
+│   │   ├── signup/          # Signup page (Public)
+│   │   ├── about/           # About page (Public)
+│   │   ├── not-found.tsx    # Custom 404 page
+│   │   ├── error.tsx        # Error boundary
+│   │   └── middleware.ts    # Route protection
 │   ├── components/
 │   │   ├── FileUpload.tsx   # Drag & drop file upload
+│   │   ├── Breadcrumbs.tsx  # SEO-friendly navigation
 │   │   ├── Navbar.tsx       # Navigation with auth state
 │   │   └── ProtectedRoute.tsx
 │   ├── context/
