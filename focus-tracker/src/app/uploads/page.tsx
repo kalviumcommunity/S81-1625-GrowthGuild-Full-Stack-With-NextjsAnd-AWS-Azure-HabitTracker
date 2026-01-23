@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import FileUpload from "@/components/FileUpload";
 
 interface UploadedFile {
@@ -108,10 +109,18 @@ export default function UploadsPage() {
     );
   };
 
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    { label: "Uploads", href: "/uploads" },
+  ];
+
   return (
     <ProtectedRoute>
       <main className="min-h-screen py-12 px-4">
         <div className="container mx-auto max-w-6xl">
+          {/* Breadcrumbs */}
+          <Breadcrumbs items={breadcrumbItems} />
+
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
