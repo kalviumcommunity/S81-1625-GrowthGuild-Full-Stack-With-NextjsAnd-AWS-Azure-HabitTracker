@@ -114,7 +114,7 @@ export default function DashboardPage() {
             <h1 className="text-3xl font-bold">
               Welcome back{user?.email ? `, ${user.email.split('@')[0]}` : ''}! 👋
             </h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-gray-400 mt-1">
               Track your daily progress and stay motivated
             </p>
           </div>
@@ -122,14 +122,14 @@ export default function DashboardPage() {
             <button
               onClick={fetchDashboardData}
               disabled={loading}
-              className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 flex items-center space-x-1"
+              className="text-sm text-cyan-400 hover:text-cyan-300 flex items-center space-x-1"
             >
               <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
               <span>Refresh</span>
             </button>
-            <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex items-center space-x-2 text-sm text-gray-400">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -142,19 +142,19 @@ export default function DashboardPage() {
         {loading && (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-              <p className="mt-4 text-gray-500">Loading your dashboard...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mx-auto"></div>
+              <p className="mt-4 text-gray-400">Loading your dashboard...</p>
             </div>
           </div>
         )}
 
         {/* Error State */}
         {error && !loading && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 text-center">
-            <p className="text-red-600 dark:text-red-400">{error}</p>
+          <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 text-center">
+            <p className="text-red-400">{error}</p>
             <button
               onClick={fetchDashboardData}
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500"
             >
               Try Again
             </button>
@@ -201,12 +201,12 @@ export default function DashboardPage() {
               <div className="stat-card text-center py-12">
                 <div className="text-6xl mb-4">📝</div>
                 <h3 className="text-xl font-semibold mb-2">No habits yet!</h3>
-                <p className="text-gray-500 dark:text-gray-400 mb-6">
+                <p className="text-gray-400 mb-6">
                   Start building better habits by creating your first one.
                 </p>
                 <a
                   href="/habits"
-                  className="inline-block px-6 py-3 bg-gradient-to-r from-indigo-600 to-cyan-600 text-white rounded-xl font-medium hover:opacity-90 transition-opacity"
+                  className="inline-block px-6 py-3 bg-gradient-to-r from-cyan-500 to-fuchsia-600 text-white rounded-xl font-medium hover:opacity-90 transition-opacity shadow-lg shadow-cyan-500/20"
                 >
                   Create Your First Habit
                 </a>
@@ -225,12 +225,12 @@ export default function DashboardPage() {
                   {/* Progress Bar */}
                   <div className="mb-6">
                     <div className="flex justify-between text-sm mb-2">
-                      <span className="text-gray-600 dark:text-gray-400">Daily Progress</span>
+                      <span className="text-gray-400">Daily Progress</span>
                       <span className="font-semibold">{progressPercentage}%</span>
                     </div>
-                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-3 bg-gray-800 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-full transition-all duration-500"
+                        className="h-full bg-gradient-to-r from-cyan-400 to-fuchsia-500 rounded-full transition-all duration-500 shadow-lg shadow-cyan-500/30"
                         style={{ width: `${progressPercentage}%` }}
                       ></div>
                     </div>
@@ -244,15 +244,15 @@ export default function DashboardPage() {
                         onClick={() => toggleHabit(habit.habitId)}
                         className={`flex items-center justify-between p-4 rounded-xl transition-all cursor-pointer hover:scale-[1.01] ${
                           habit.completed 
-                            ? "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800" 
-                            : "bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600"
+                            ? "bg-emerald-500/10 border border-emerald-500/30" 
+                            : "bg-gray-800/50 border border-gray-700 hover:border-cyan-500/50"
                         } ${toggling === habit.habitId ? "opacity-50 pointer-events-none" : ""}`}
                       >
                         <div className="flex items-center space-x-3">
                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
                             habit.completed
-                              ? "bg-green-500 text-white"
-                              : "bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-300"
+                              ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
+                              : "bg-gray-700 text-gray-400"
                           }`}>
                             {toggling === habit.habitId ? (
                               <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -270,12 +270,12 @@ export default function DashboardPage() {
                           </div>
                           <div>
                             <span className={`font-medium ${
-                              habit.completed ? "text-green-700 dark:text-green-300 line-through" : ""
+                              habit.completed ? "text-emerald-400 line-through" : ""
                             }`}>
                               {habit.title}
                             </span>
                             {habit.description && (
-                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                              <p className="text-xs text-gray-500 mt-0.5">
                                 {habit.description}
                               </p>
                             )}
@@ -283,7 +283,7 @@ export default function DashboardPage() {
                         </div>
                         <span className={`text-sm font-medium ${
                           habit.completed 
-                            ? "text-green-600 dark:text-green-400" 
+                            ? "text-emerald-400" 
                             : "text-gray-500"
                         }`}>
                           {habit.completed ? "✓ Done" : "Click to complete"}
@@ -302,30 +302,30 @@ export default function DashboardPage() {
                   <div className="space-y-4">
                     {data.weeklyProgress.map((day, index) => (
                       <div key={index} className="flex items-center space-x-3">
-                        <span className="w-10 text-sm font-medium text-gray-500">{day.day}</span>
-                        <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <span className="w-10 text-sm font-medium text-gray-400">{day.day}</span>
+                        <div className="flex-1 h-2 bg-gray-800 rounded-full overflow-hidden">
                           <div 
                             className={`h-full rounded-full transition-all ${
                               day.total > 0 && day.completed === day.total 
-                                ? "bg-gradient-to-r from-green-400 to-emerald-500" 
-                                : "bg-gradient-to-r from-indigo-400 to-indigo-500"
+                                ? "bg-gradient-to-r from-emerald-400 to-green-500" 
+                                : "bg-gradient-to-r from-cyan-400 to-fuchsia-500"
                             }`}
                             style={{ width: day.total > 0 ? `${(day.completed / day.total) * 100}%` : '0%' }}
                           ></div>
                         </div>
-                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-12 text-right">
+                        <span className="text-sm font-medium text-gray-400 w-12 text-right">
                           {day.completed}/{day.total}
                         </span>
                       </div>
                     ))}
                   </div>
 
-                  <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                  <div className="mt-6 pt-6 border-t border-gray-700">
                     <div className="text-center">
                       <div className="text-2xl font-bold gradient-text">
                         {data.weeklyCompleted}/{data.weeklyTotal}
                       </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                      <div className="text-sm text-gray-400">
                         Habits completed this week
                       </div>
                     </div>
@@ -336,7 +336,7 @@ export default function DashboardPage() {
 
             {/* Motivational Quote */}
             <div className="glass-card rounded-2xl p-6 text-center">
-              <p className="text-lg italic text-gray-600 dark:text-gray-300">
+              <p className="text-lg italic text-gray-300">
                 &ldquo;We are what we repeatedly do. Excellence, then, is not an act, but a habit.&rdquo;
               </p>
               <p className="text-sm text-gray-500 mt-2">— Aristotle</p>
@@ -356,24 +356,24 @@ function StatCard({ icon, label, value, trend, color }: {
   color: "green" | "blue" | "orange" | "purple";
 }) {
   const colorClasses = {
-    green: "from-green-400 to-emerald-500",
-    blue: "from-blue-400 to-cyan-500",
-    orange: "from-orange-400 to-amber-500",
-    purple: "from-purple-400 to-indigo-500",
+    green: "from-emerald-400 to-green-500 shadow-emerald-500/30",
+    blue: "from-cyan-400 to-blue-500 shadow-cyan-500/30",
+    orange: "from-amber-400 to-orange-500 shadow-amber-500/30",
+    purple: "from-fuchsia-400 to-purple-500 shadow-fuchsia-500/30",
   };
 
   return (
     <div className="stat-card hover-lift">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{label}</p>
+          <p className="text-sm text-gray-400 mb-1">{label}</p>
           <p className="text-3xl font-bold">{value}</p>
         </div>
-        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${colorClasses[color]} flex items-center justify-center text-2xl shadow-lg`}>
+        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${colorClasses[color]} flex items-center justify-center text-2xl shadow-lg shadow-cyan-500/20`}>
           {icon}
         </div>
       </div>
-      <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">{trend}</p>
+      <p className="text-xs text-gray-500 mt-3">{trend}</p>
     </div>
   );
 }
