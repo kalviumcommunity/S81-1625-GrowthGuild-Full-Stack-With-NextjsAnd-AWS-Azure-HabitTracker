@@ -601,6 +601,273 @@ curl -X POST http://localhost:3000/api/email \
 
 ---
 
+## 🏗️ Component Architecture
+
+HabitFlow uses a modular component architecture for maintainability, reusability, and scalability.
+
+### Component Hierarchy
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        RootLayout                           │
+│  ┌───────────────────────────────────────────────────────┐  │
+│  │                      Header                            │  │
+│  │   [Logo] [Nav Links] [Auth Status]                    │  │
+│  └───────────────────────────────────────────────────────┘  │
+│  ┌─────────────┬─────────────────────────────────────────┐  │
+│  │   Sidebar   │              Main Content               │  │
+│  │   (opt.)    │   ┌─────────────────────────────────┐   │  │
+│  │             │   │         PageHeader              │   │  │
+│  │  • Home     │   │   [Title] [Subtitle] [Actions]  │   │  │
+│  │  • Dashboard│   └─────────────────────────────────┘   │  │
+│  │  • Habits   │   ┌─────────────────────────────────┐   │  │
+│  │  • Users    │   │       Page Content              │   │  │
+│  │  • Uploads  │   │   [Cards] [Forms] [Lists]       │   │  │
+│  │             │   └─────────────────────────────────┘   │  │
+│  └─────────────┴─────────────────────────────────────────┘  │
+│  ┌───────────────────────────────────────────────────────┐  │
+│  │                      Footer                            │  │
+│  │   [Logo] [Links] [Tech Badges]                        │  │
+│  └───────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Folder Structure
+
+```
+src/components/
+├── layout/                    # Layout components
+│   ├── Header.tsx            # Navigation header
+│   ├── Sidebar.tsx           # Side navigation
+│   ├── Footer.tsx            # Page footer
+│   ├── LayoutWrapper.tsx     # Layout composition
+│   └── index.ts              # Barrel export
+├── ui/                        # Reusable UI primitives
+│   ├── Button.tsx            # Button component
+│   ├── Card.tsx              # Card component
+│   ├── InputField.tsx        # Form inputs
+│   ├── Modal.tsx             # Modal dialog
+│   ├── Badge.tsx             # Status badges
+│   └── index.ts              # Barrel export
+├── Navbar.tsx                 # Legacy navbar (refactored to Header)
+├── Breadcrumbs.tsx           # Breadcrumb navigation
+├── FileUpload.tsx            # File upload component
+├── ProtectedRoute.tsx        # Auth wrapper
+└── index.ts                   # Main barrel export
+```
+
+### Component Categories
+
+| Category | Components | Purpose |
+|----------|------------|---------|
+| **Layout** | Header, Sidebar, Footer, LayoutWrapper | Page structure and navigation |
+| **UI** | Button, Card, InputField, Modal, Badge | Reusable UI primitives |
+| **Functional** | ProtectedRoute, FileUpload, Breadcrumbs | Feature-specific components |
+
+### Usage Examples
+
+#### Importing Components
+```tsx
+// Single import from barrel export
+import { Button, Card, Header, InputField } from "@/components";
+
+// Category-specific imports
+import { Header, Sidebar, Footer } from "@/components/layout";
+import { Button, Card, Modal } from "@/components/ui";
+```
+
+#### Button Component
+```tsx
+// Primary button (default)
+<Button label="Save Changes" onClick={handleSave} />
+
+// Secondary button
+<Button variant="secondary" label="Cancel" />
+
+// Loading state
+<Button loading label="Saving..." disabled />
+
+// With icons
+<Button 
+  leftIcon={<PlusIcon />} 
+  label="Add Habit" 
+  variant="success" 
+/>
+
+// Sizes
+<Button size="sm" label="Small" />
+<Button size="lg" label="Large" />
+```
+
+**Props Contract:**
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| label | string | - | Button text |
+| variant | 'primary' \| 'secondary' \| 'danger' \| 'success' \| 'ghost' | 'primary' | Visual style |
+| size | 'sm' \| 'md' \| 'lg' | 'md' | Button size |
+| loading | boolean | false | Show loading spinner |
+| leftIcon | ReactNode | - | Icon before text |
+| rightIcon | ReactNode | - | Icon after text |
+| fullWidth | boolean | false | Full width button |
+
+#### Card Component
+```tsx
+// Basic card
+<Card title="My Habits" subtitle="Track your progress">
+  <p>Card content here</p>
+</Card>
+
+// Stat card with icon
+<StatCard 
+  value="24" 
+  label="Total Habits" 
+  icon="📊"
+  color="indigo"
+  trend={{ value: 12, direction: "up" }}
+/>
+
+// Glass morphism card
+<Card variant="glass" hoverable onClick={handleClick}>
+  <p>Interactive glass card</p>
+</Card>
+```
+
+#### InputField Component
+```tsx
+// Basic input
+<InputField 
+  label="Email" 
+  type="email" 
+  placeholder="Enter your email"
+  required
+/>
+
+// With error state
+<InputField 
+  label="Password" 
+  type="password" 
+  error="Password must be at least 8 characters"
+/>
+
+// With icons
+<InputField 
+  label="Search" 
+  leftIcon={<SearchIcon />}
+  placeholder="Search habits..."
+/>
+
+// TextArea variant
+<TextArea 
+  label="Description" 
+  rows={4}
+  helperText="Optional description for your habit"
+/>
+```
+
+#### Modal Component
+```tsx
+const [isOpen, setIsOpen] = useState(false);
+
+<Modal 
+  isOpen={isOpen} 
+  onClose={() => setIsOpen(false)}
+  title="Create New Habit"
+  size="md"
+  footer={
+    <>
+      <Button variant="secondary" label="Cancel" onClick={() => setIsOpen(false)} />
+      <Button label="Create" onClick={handleCreate} />
+    </>
+  }
+>
+  <form>
+    <InputField label="Habit Name" required />
+    <InputField label="Description" />
+  </form>
+</Modal>
+```
+
+#### Layout Components
+```tsx
+// Using LayoutWrapper for consistent page structure
+<LayoutWrapper variant="default">
+  <PageContainer>
+    <PageHeader 
+      title="Dashboard" 
+      subtitle="Track your habit progress"
+      actions={<Button label="Add Habit" />}
+    />
+    {/* Page content */}
+  </PageContainer>
+</LayoutWrapper>
+
+// Sidebar layout variant
+<LayoutWrapper variant="sidebar">
+  {/* Content with sidebar */}
+</LayoutWrapper>
+```
+
+### Design Consistency
+
+All components follow these design principles:
+
+1. **Color Palette**: Uses CSS custom properties for consistent theming
+   - Primary: Indigo (#6366f1)
+   - Secondary: Cyan (#06b6d4)
+   - Success: Emerald (#10b981)
+   - Danger: Red (#ef4444)
+
+2. **Spacing**: Consistent padding/margin using Tailwind's spacing scale
+
+3. **Border Radius**: Rounded corners (rounded-xl for cards, rounded-lg for buttons)
+
+4. **Transitions**: All interactive elements have smooth 200-300ms transitions
+
+5. **Dark Mode**: Full support via Tailwind's dark: prefix and CSS variables
+
+### Accessibility Features
+
+| Feature | Implementation |
+|---------|---------------|
+| **Keyboard Navigation** | All interactive elements are focusable with Tab |
+| **ARIA Labels** | Buttons, inputs, and modals have proper aria-* attributes |
+| **Focus Indicators** | Visible focus rings on interactive elements |
+| **Screen Reader Support** | Hidden decorative icons with aria-hidden="true" |
+| **Color Contrast** | WCAG AA compliant color combinations |
+| **Error Announcements** | Form errors use role="alert" for screen readers |
+
+### Adding New Components
+
+1. Create component file in appropriate folder (`layout/` or `ui/`)
+2. Add TypeScript interface for props
+3. Include JSDoc documentation
+4. Export from barrel file (`index.ts`)
+5. Add usage examples to this README
+
+```tsx
+// Example: components/ui/NewComponent.tsx
+interface NewComponentProps {
+  /** Required prop description */
+  title: string;
+  /** Optional prop with default */
+  variant?: "default" | "alt";
+}
+
+/**
+ * NewComponent
+ * 
+ * Brief description of what this component does.
+ * 
+ * @example
+ * <NewComponent title="Hello" variant="alt" />
+ */
+export default function NewComponent({ title, variant = "default" }: NewComponentProps) {
+  // Implementation
+}
+```
+
+---
+
 ## 🚀 Deployment
 
 ### Environment Variables Required

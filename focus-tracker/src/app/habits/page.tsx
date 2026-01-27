@@ -157,10 +157,10 @@ export default function HabitsPage() {
   };
 
   const categories = [
-    { name: "Health", color: "from-green-400 to-emerald-500", icon: "💪" },
-    { name: "Learning", color: "from-blue-400 to-cyan-500", icon: "🎓" },
-    { name: "Skills", color: "from-purple-400 to-indigo-500", icon: "⚡" },
-    { name: "Wellness", color: "from-orange-400 to-amber-500", icon: "🌟" },
+    { name: "Health", color: "from-emerald-400 to-green-500", icon: "💪" },
+    { name: "Learning", color: "from-cyan-400 to-blue-500", icon: "🎓" },
+    { name: "Skills", color: "from-fuchsia-400 to-purple-500", icon: "⚡" },
+    { name: "Wellness", color: "from-amber-400 to-yellow-500", icon: "🌟" },
   ];
 
   const breadcrumbItems = [
@@ -178,7 +178,7 @@ export default function HabitsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">My Habits</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-gray-400 mt-1">
             Create and manage your personal habits
           </p>
         </div>
@@ -204,7 +204,7 @@ export default function HabitsPage() {
               {category.icon}
             </div>
             <h3 className="font-semibold">{category.name}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Category</p>
+            <p className="text-sm text-gray-400">Category</p>
           </div>
         ))}
       </div>
@@ -213,8 +213,8 @@ export default function HabitsPage() {
       {loading && (
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-            <p className="mt-4 text-gray-500">Loading your habits...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mx-auto"></div>
+            <p className="mt-4 text-gray-400">Loading your habits...</p>
           </div>
         </div>
       )}
@@ -224,12 +224,12 @@ export default function HabitsPage() {
         <div className="stat-card text-center py-12">
           <div className="text-6xl mb-4">📝</div>
           <h3 className="text-xl font-semibold mb-2">No habits yet!</h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">
+          <p className="text-gray-400 mb-6">
             Start building better habits by creating your first one.
           </p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="inline-block px-6 py-3 bg-gradient-to-r from-indigo-600 to-cyan-600 text-white rounded-xl font-medium hover:opacity-90 transition-opacity"
+            className="inline-block px-6 py-3 bg-gradient-to-r from-cyan-500 to-fuchsia-600 text-white rounded-xl font-medium hover:opacity-90 transition-opacity shadow-lg shadow-cyan-500/20"
           >
             Create Your First Habit
           </button>
@@ -251,7 +251,7 @@ export default function HabitsPage() {
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-100 to-cyan-100 dark:from-indigo-900/50 dark:to-cyan-900/50 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-fuchsia-500/20 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
                     {getHabitIcon(habit.title)}
                   </div>
                   <div className="flex items-center space-x-2">
@@ -276,11 +276,11 @@ export default function HabitsPage() {
                 </div>
                 
                 <h3 className="text-lg font-semibold mb-2">{habit.title}</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                <p className="text-sm text-gray-400 mb-4">
                   {habit.description || "No description"}
                 </p>
                 
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between pt-4 border-t border-gray-700">
                   <div className="flex items-center space-x-1">
                     <span className="text-orange-500">🔥</span>
                     <span className="text-sm font-medium">{calculateStreak(habit.logs)} day streak</span>
@@ -295,7 +295,7 @@ export default function HabitsPage() {
 
                 <a 
                   href="/dashboard"
-                  className="block w-full mt-4 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors text-center"
+                  className="block w-full mt-4 py-2 rounded-xl bg-cyan-500/10 text-cyan-400 font-medium hover:bg-cyan-500/20 transition-colors text-center border border-cyan-500/30"
                 >
                   Track Today
                 </a>
@@ -331,15 +331,15 @@ export default function HabitsPage() {
 
       {/* Footer Info */}
       <div className="text-center py-4">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-gray-400">
           {habits.length} habit{habits.length !== 1 ? "s" : ""} tracked
         </p>
       </div>
 
       {/* Create Habit Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md animate-fade-in-up">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md animate-fade-in-up">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold">Create New Habit</h2>
               <button
@@ -360,7 +360,7 @@ export default function HabitsPage() {
                   value={newHabit.title}
                   onChange={(e) => setNewHabit({ ...newHabit, title: e.target.value })}
                   placeholder="e.g., Morning Meditation"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-700 bg-gray-800 focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-white placeholder-gray-500"
                   required
                 />
               </div>
@@ -372,7 +372,7 @@ export default function HabitsPage() {
                   onChange={(e) => setNewHabit({ ...newHabit, description: e.target.value })}
                   placeholder="e.g., 10 minutes of mindfulness every morning"
                   rows={3}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-700 bg-gray-800 focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-white placeholder-gray-500"
                 />
               </div>
 
@@ -381,7 +381,7 @@ export default function HabitsPage() {
                 <select
                   value={newHabit.frequency}
                   onChange={(e) => setNewHabit({ ...newHabit, frequency: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-700 bg-gray-800 focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-white"
                 >
                   <option value="DAILY">Daily</option>
                   <option value="WEEKLY">Weekly</option>
@@ -393,14 +393,14 @@ export default function HabitsPage() {
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="flex-1 py-3 rounded-xl border border-gray-200 dark:border-gray-700 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  className="flex-1 py-3 rounded-xl border border-gray-700 font-medium hover:bg-gray-800 transition-colors text-gray-300"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={creating || !newHabit.title.trim()}
-                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-fuchsia-600 text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shadow-lg shadow-cyan-500/20"
                 >
                   {creating ? "Creating..." : "Create Habit"}
                 </button>
@@ -417,12 +417,12 @@ export default function HabitsPage() {
 function TipCard({ number, title, description }: { number: string; title: string; description: string }) {
   return (
     <div className="flex space-x-4">
-      <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm">
+      <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-fuchsia-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-cyan-500/30">
         {number}
       </div>
       <div>
         <h3 className="font-semibold mb-1">{title}</h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>
+        <p className="text-sm text-gray-400">{description}</p>
       </div>
     </div>
   );

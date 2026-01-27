@@ -39,8 +39,8 @@ export default async function HomePage() {
       {/* Hero Section */}
       <section className="relative py-12 lg:py-20">
         <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-indigo-400/30 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-cyan-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-fuchsia-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
         </div>
         
         <div className="text-center max-w-4xl mx-auto animate-fade-in-up">
@@ -49,7 +49,7 @@ export default async function HomePage() {
             Build Better Habits,
             <span className="block gradient-text">One Day at a Time</span>
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
             Transform your life with HabitFlow - the modern habit tracking app that helps you 
             stay consistent, build streaks, and achieve your goals.
           </p>
@@ -78,7 +78,7 @@ export default async function HomePage() {
                 <div className="text-3xl sm:text-4xl font-bold gradient-text mb-2">
                   {stat.value}
                 </div>
-                <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                <div className="text-sm text-gray-500 font-medium">
                   {stat.label}
                 </div>
               </div>
@@ -93,7 +93,7 @@ export default async function HomePage() {
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
             Everything You Need to <span className="gradient-text">Succeed</span>
           </h2>
-          <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          <p className="text-gray-400 max-w-2xl mx-auto">
             Powerful features designed to help you build lasting habits and transform your daily routine.
           </p>
         </div>
@@ -107,7 +107,7 @@ export default async function HomePage() {
             >
               <div className="text-4xl mb-4">{feature.icon}</div>
               <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm">
+              <p className="text-gray-400 text-sm">
                 {feature.description}
               </p>
             </div>
@@ -117,18 +117,18 @@ export default async function HomePage() {
 
       {/* CTA Section */}
       <section className="py-8">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-600 to-cyan-600 p-8 sm:p-12 lg:p-16">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-cyan-600 to-fuchsia-600 p-8 sm:p-12 lg:p-16">
           <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]"></div>
           <div className="relative text-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
               Ready to Transform Your Habits?
             </h2>
-            <p className="text-indigo-100 mb-8 max-w-2xl mx-auto">
+            <p className="text-cyan-100 mb-8 max-w-2xl mx-auto">
               Join thousands of users who have already improved their daily routines with HabitFlow.
             </p>
             <Link 
               href="/habits" 
-              className="inline-flex items-center bg-white text-indigo-600 font-semibold px-8 py-4 rounded-xl hover:bg-indigo-50 transition-colors shadow-lg"
+              className="inline-flex items-center bg-white text-cyan-600 font-semibold px-8 py-4 rounded-xl hover:bg-cyan-50 transition-colors shadow-lg shadow-cyan-500/30"
             >
               Explore Habits
               <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

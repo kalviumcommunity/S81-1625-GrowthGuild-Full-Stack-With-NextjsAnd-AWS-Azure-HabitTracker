@@ -33,7 +33,7 @@ export default function AboutPage() {
         <h1 className="text-4xl sm:text-5xl font-bold mb-4">
           About <span className="gradient-text">HabitFlow</span>
         </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+        <p className="text-lg text-gray-400 max-w-2xl mx-auto">
           A full-stack habit tracking application demonstrating modern web development 
           practices with Next.js, TypeScript, and cloud technologies.
         </p>
@@ -42,11 +42,11 @@ export default function AboutPage() {
       {/* Mission Statement */}
       <section className="glass-card rounded-2xl p-8 sm:p-12">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-3xl mx-auto mb-6 shadow-lg">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-fuchsia-500 flex items-center justify-center text-3xl mx-auto mb-6 shadow-lg shadow-cyan-500/30">
             🎯
           </div>
           <h2 className="text-2xl font-bold mb-4">Our Mission</h2>
-          <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          <p className="text-gray-400 leading-relaxed">
             HabitFlow was created to help users build lasting habits through a beautiful, 
             intuitive interface and powerful tracking features. This capstone project showcases 
             the integration of modern technologies to create a production-ready application 
@@ -59,7 +59,7 @@ export default function AboutPage() {
       <section>
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold mb-2">Technology Stack</h2>
-          <p className="text-gray-500 dark:text-gray-400">
+          <p className="text-gray-400">
             Built with cutting-edge technologies for optimal performance
           </p>
         </div>
@@ -73,7 +73,7 @@ export default function AboutPage() {
             >
               <div className="text-4xl mb-3">{tech.icon}</div>
               <h3 className="font-semibold text-sm mb-1">{tech.name}</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{tech.description}</p>
+              <p className="text-xs text-gray-400">{tech.description}</p>
             </div>
           ))}
         </div>
@@ -90,12 +90,12 @@ export default function AboutPage() {
                 className="flex items-start space-x-3 animate-slide-in-right"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-cyan-400 to-emerald-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
                   <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <span className="text-gray-700 dark:text-gray-300">{feature}</span>
+                <span className="text-gray-300">{feature}</span>
               </div>
             ))}
           </div>
@@ -143,11 +143,11 @@ export default function AboutPage() {
         <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
           {team.map((member, index) => (
             <div key={index} className="stat-card hover-lift">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-400 to-cyan-400 mx-auto mb-4 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-400 to-fuchsia-400 mx-auto mb-4 flex items-center justify-center shadow-lg shadow-cyan-500/30">
                 <span className="text-2xl">👤</span>
               </div>
               <h3 className="font-semibold">{member.role}</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{member.focus}</p>
+              <p className="text-sm text-gray-400">{member.focus}</p>
             </div>
           ))}
         </div>
@@ -157,7 +157,7 @@ export default function AboutPage() {
       <section className="text-center py-8">
         <div className="glass-card rounded-2xl p-8 max-w-2xl mx-auto">
           <h2 className="text-2xl font-bold mb-4">Ready to Get Started?</h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">
+          <p className="text-gray-400 mb-6">
             Start building better habits today with HabitFlow.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -177,7 +177,7 @@ export default function AboutPage() {
 function StatItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between items-center">
-      <span className="text-gray-500 dark:text-gray-400">{label}</span>
+      <span className="text-gray-400">{label}</span>
       <span className="font-semibold gradient-text">{value}</span>
     </div>
   );
@@ -185,12 +185,12 @@ function StatItem({ label, value }: { label: string; value: string }) {
 
 function ArchitectureCard({ title, icon, items }: { title: string; icon: string; items: string[] }) {
   return (
-    <div className="text-center p-6 rounded-xl bg-gray-50 dark:bg-gray-800/50">
+    <div className="text-center p-6 rounded-xl bg-gray-800/50 border border-gray-700">
       <div className="text-4xl mb-3">{icon}</div>
       <h3 className="font-semibold mb-4">{title}</h3>
       <ul className="space-y-2">
         {items.map((item, index) => (
-          <li key={index} className="text-sm text-gray-600 dark:text-gray-400">
+          <li key={index} className="text-sm text-gray-400">
             {item}
           </li>
         ))}
