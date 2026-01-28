@@ -1,8 +1,8 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import Navbar from "../components/Navbar";
 import ClientProviders from "@/components/ClientProviders";
+import AppLayout from "@/components/layout/AppLayout";
 
 export const metadata: Metadata = {
   title: "HabitFlow - Build Better Habits, One Day at a Time",
@@ -30,32 +30,9 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen antialiased">
         <ClientProviders>
-          <Navbar />
-          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <AppLayout>
             {children}
-          </main>
-          <footer className="mt-auto py-8 border-t border-gray-800">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <span className="font-semibold gradient-text">HabitFlow</span>
-                </div>
-                <p className="text-sm text-gray-400">
-                  © 2026 HabitFlow. Capstone Project - Full Stack Development
-                </p>
-                <div className="flex items-center space-x-4">
-                  <span className="badge badge-primary">Next.js 15</span>
-                  <span className="badge badge-success">TypeScript</span>
-                  <span className="badge badge-warning">Prisma</span>
-                </div>
-              </div>
-            </div>
-          </footer>
+          </AppLayout>
         </ClientProviders>
       </body>
     </html>
