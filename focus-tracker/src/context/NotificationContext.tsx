@@ -3,9 +3,9 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 
 /**
- * Notification Types
+ * Notification Types - includes loading for process feedback
  */
-export type NotificationType = "success" | "error" | "warning" | "info";
+export type NotificationType = "success" | "error" | "warning" | "info" | "loading";
 
 /**
  * Notification Interface
@@ -24,12 +24,22 @@ export interface Notification {
 }
 
 /**
+ * Promise-based toast messages for loading state
+ */
+interface PromiseMessages {
+  loading: string;
+  success: string;
+  error: string;
+}
+
+/**
  * Notification Context Type
  */
 interface NotificationContextType {
   notifications: Notification[];
   addNotification: (notification: Omit<Notification, "id">) => string;
   removeNotification: (id: string) => void;
+  updateNotification: (id: string, notification: Partial<Omit<Notification, "id">>) => void;
   clearAllNotifications: () => void;
   
   // Convenience methods
@@ -37,6 +47,13 @@ interface NotificationContextType {
   error: (title: string, message?: string, duration?: number) => string;
   warning: (title: string, message?: string, duration?: number) => string;
   info: (title: string, message?: string, duration?: number) => string;
+  loading: (title: string, message?: string) => string;
+  
+  // Promise-based helper for async operations
+  promise: <T>(
+    promise: Promise<T>,
+    messages: PromiseMessages
+  ) => Promise<T>;
 }
 
 /**
@@ -74,6 +91,13 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const removeNotification = useCallback((id: string) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
     console.log(`🔕 Notification dismissed: ${id}`);
+  }, []);
+
+  const updateNotification = useCallback((id: string, updates: Partial<Omit<Notification, "id">>) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, ...updates } : n))
+    );
+    console.log(`🔄 Notification updated: ${id}`);
   }, []);
 
   const addNotification = useCallback((notification: Omit<Notification, "id">) => {
@@ -121,15 +145,61 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     return addNotification({ type: "info", title, message, duration });
   }, [addNotification]);
 
+  // Loading toast - persists until manually dismissed or updated
+  const loadingNotification = useCallback((title: string, message = "") => {
+    return addNotification({ 
+      type: "loading", 
+      title, 
+      message, 
+      duration: 0, // Persists indefinitely
+      dismissible: false 
+    });
+  }, [addNotification]);
+
+  // Promise-based helper for async operations
+  // Shows loading → success/error automatically
+  const promiseNotification = useCallback(async <T,>(
+    promise: Promise<T>,
+    messages: PromiseMessages
+  ): Promise<T> => {
+    const id = loadingNotification(messages.loading);
+    
+    try {
+      const result = await promise;
+      updateNotification(id, {
+        type: "success",
+        title: messages.success,
+        message: "",
+        duration: 5000,
+        dismissible: true,
+      });
+      // Auto-dismiss after success
+      setTimeout(() => removeNotification(id), 5000);
+      return result;
+    } catch (err) {
+      updateNotification(id, {
+        type: "error",
+        title: messages.error,
+        message: err instanceof Error ? err.message : "An error occurred",
+        duration: 0, // Errors persist
+        dismissible: true,
+      });
+      throw err;
+    }
+  }, [loadingNotification, updateNotification, removeNotification]);
+
   const value: NotificationContextType = {
     notifications,
     addNotification,
     removeNotification,
+    updateNotification,
     clearAllNotifications,
     success,
     error,
     warning,
     info,
+    loading: loadingNotification,
+    promise: promiseNotification,
   };
 
   return (
