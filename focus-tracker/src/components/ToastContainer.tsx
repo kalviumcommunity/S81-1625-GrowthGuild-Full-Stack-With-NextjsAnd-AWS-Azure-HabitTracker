@@ -96,7 +96,7 @@ function ToastItem({
     <div
       className={`
         ${styles.bgColor} ${styles.borderColor} ${styles.shadowColor}
-        border rounded-lg p-4 shadow-lg backdrop-blur-sm
+        bg-gray-900/95 border rounded-lg p-4 shadow-lg backdrop-blur-sm
         transform transition-all duration-300 ease-out
         ${isExiting ? "translate-x-full opacity-0" : "translate-x-0 opacity-100"}
         hover:scale-[1.02] hover:shadow-xl
@@ -171,7 +171,7 @@ export default function ToastContainer() {
 
   return (
     <div
-      className="fixed top-4 right-4 z-50 flex flex-col gap-3 w-full max-w-sm"
+      className="fixed top-20 right-4 z-[100] flex flex-col gap-3 w-full max-w-sm"
       role="region"
       aria-label="Notifications"
     >

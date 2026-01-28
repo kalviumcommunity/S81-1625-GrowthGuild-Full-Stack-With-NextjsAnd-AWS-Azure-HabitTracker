@@ -5,7 +5,7 @@
  * 
  * @example
  * ```tsx
- * import { Header, Sidebar, Footer, LayoutWrapper } from "@/components/layout";
+ * import { Header, Sidebar, Footer, LayoutWrapper, AppLayout } from "@/components/layout";
  * ```
  */
 
@@ -13,3 +13,4 @@ export { default as Header } from "./Header";
 export { default as Sidebar } from "./Sidebar";
 export { default as Footer } from "./Footer";
 export { default as LayoutWrapper, PageContainer, PageHeader } from "./LayoutWrapper";
+export { default as AppLayout } from "./AppLayout";

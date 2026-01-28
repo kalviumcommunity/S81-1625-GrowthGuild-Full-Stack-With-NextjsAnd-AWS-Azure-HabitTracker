@@ -55,6 +55,9 @@ export default function StateManagementDemo() {
         <p className="text-gray-400">
           Explore how to use React Context API and custom hooks for global state
         </p>
+        <p className="text-sm text-cyan-400/70 mt-2">
+          👈 Use the sidebar collapse button on the left to test sidebar state
+        </p>
       </div>
 
       {/* Global Loading Indicator */}
@@ -67,7 +70,7 @@ export default function StateManagementDemo() {
             </div>
           </div>
         </div>
-      )}
+          )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Authentication State Card */}
