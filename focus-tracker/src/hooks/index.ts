@@ -8,7 +8,7 @@
  * 
  * @example
  * ```tsx
- * import { useAuth, useUI, useTheme, useNotification } from '@/hooks';
+ * import { useAuth, useUI, useTheme, useNotification, useHabits } from '@/hooks';
  * ```
  */
 
@@ -26,3 +26,13 @@ export {
 
 // Notification hook
 export { useNotification } from "@/context/NotificationContext";
+
+// SWR Data fetching hooks
+export {
+  useHabits,
+  useHabit,
+  useHabitMutations,
+  useCacheDebug,
+  SWR_KEYS,
+} from "./useHabits";
+export type { Habit, HabitLog, CreateHabitInput, UpdateHabitInput } from "./useHabits";
