@@ -54,7 +54,14 @@ export default function Sidebar({ className = "", collapsed = false, onLinkClick
     { href: "/habits", label: "My Habits", icon: "🎯", requiresAuth: true },
     { href: "/users", label: "Users", icon: "👥", requiresAuth: true },
     { href: "/uploads", label: "Uploads", icon: "☁️", requiresAuth: true },
+    { href: "/contact", label: "Contact", icon: "✉️" },
     { href: "/about", label: "About", icon: "ℹ️" },
+  ];
+
+  const demoLinks: SidebarLink[] = [
+    { href: "/forms-demo", label: "Forms Demo", icon: "📋" },
+    { href: "/swr-demo", label: "SWR Demo", icon: "🔄" },
+    { href: "/state-demo", label: "State Demo", icon: "⚡" },
   ];
 
   const filteredLinks = navigationLinks.filter(
@@ -145,6 +152,29 @@ export default function Sidebar({ className = "", collapsed = false, onLinkClick
                   >
                     <span className="text-lg" aria-hidden="true">{action.icon}</span>
                     <span className="text-sm">{action.label}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Demo Links Section */}
+        {!collapsed && (
+          <div className="mt-8">
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-3">
+              Demos
+            </h2>
+            <ul className="space-y-1" role="list">
+              {demoLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    onClick={onLinkClick}
+                    className="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-gray-400 hover:bg-gray-800 hover:text-purple-400 transition-all duration-200"
+                  >
+                    <span className="text-lg" aria-hidden="true">{link.icon}</span>
+                    <span className="text-sm">{link.label}</span>
                   </Link>
                 </li>
               ))}
