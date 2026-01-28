@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { useAuth } from "@/context/AuthContext";
+import { useNotification } from "@/context/NotificationContext";
+import { ConfirmDialog, useConfirmDialog } from "@/components/ui";
 
 interface HabitLog {
   id: number;
@@ -23,12 +25,16 @@ interface Habit {
 
 export default function HabitsPage() {
   const { user } = useAuth();
+  const { success, error: showError } = useNotification();
+  const deleteDialog = useConfirmDialog();
+  
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newHabit, setNewHabit] = useState({ title: "", description: "", frequency: "DAILY" });
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<number | null>(null);
+  const [habitToDelete, setHabitToDelete] = useState<Habit | null>(null);
 
   const fetchHabits = useCallback(async () => {
     if (!user?.id) return;
@@ -73,10 +79,14 @@ export default function HabitsPage() {
       if (result.success) {
         setShowCreateModal(false);
         setNewHabit({ title: "", description: "", frequency: "DAILY" });
+        success("Habit Created!", `"${newHabit.title}" has been added to your habits.`);
         await fetchHabits();
+      } else {
+        showError("Creation Failed", result.message || "Failed to create habit.");
       }
     } catch (err) {
       console.error("Failed to create habit:", err);
+      showError("Error", "Something went wrong. Please try again.");
     } finally {
       setCreating(false);
     }
@@ -84,8 +94,6 @@ export default function HabitsPage() {
 
   const deleteHabit = async (habitId: number) => {
     if (deleting) return;
-
-    if (!confirm("Are you sure you want to delete this habit?")) return;
 
     setDeleting(habitId);
     try {
@@ -96,13 +104,25 @@ export default function HabitsPage() {
       const result = await response.json();
 
       if (result.success) {
+        success("Habit Deleted!", `"${habitToDelete?.title}" has been removed.`);
         await fetchHabits();
+      } else {
+        showError("Deletion Failed", result.message || "Failed to delete habit.");
       }
     } catch (err) {
       console.error("Failed to delete habit:", err);
+      showError("Error", "Something went wrong. Please try again.");
     } finally {
       setDeleting(null);
+      setHabitToDelete(null);
+      deleteDialog.closeDialog();
     }
+  };
+
+  // Open delete confirmation dialog
+  const openDeleteDialog = (habit: Habit) => {
+    setHabitToDelete(habit);
+    deleteDialog.openDialog();
   };
 
   // Calculate streaks for each habit
@@ -257,7 +277,7 @@ export default function HabitsPage() {
                   <div className="flex items-center space-x-2">
                     <span className="badge badge-primary">{habit.frequency}</span>
                     <button
-                      onClick={() => deleteHabit(habit.id)}
+                      onClick={() => openDeleteDialog(habit)}
                       disabled={deleting === habit.id}
                       className="text-gray-400 hover:text-red-500 transition-colors p-1"
                       title="Delete habit"
@@ -409,6 +429,26 @@ export default function HabitsPage() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={() => {
+          deleteDialog.closeDialog();
+          setHabitToDelete(null);
+        }}
+        onConfirm={async () => {
+          if (habitToDelete) {
+            await deleteHabit(habitToDelete.id);
+          }
+        }}
+        title="Delete Habit?"
+        message={`Are you sure you want to delete "${habitToDelete?.title}"? This will remove all associated habit logs and cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+        isLoading={deleting === habitToDelete?.id}
+      />
     </div>
     </ProtectedRoute>
   );

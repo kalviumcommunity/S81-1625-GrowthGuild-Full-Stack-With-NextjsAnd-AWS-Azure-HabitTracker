@@ -30,7 +30,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const userInitial = displayName.charAt(0).toUpperCase();
 
   return (
-    <div className="flex min-h-screen bg-gray-950">
+    <div className="flex min-h-screen bg-[var(--background)]">
       {/* Desktop Sidebar */}
       <div className="hidden lg:block fixed left-0 top-0 h-screen z-40">
         <div className="relative h-full">
@@ -38,7 +38,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
           {/* Collapse Toggle Button */}
           <button
             onClick={toggleCollapse}
-            className="absolute -right-3 top-20 w-6 h-6 bg-gray-800 border border-gray-700 rounded-full flex items-center justify-center text-gray-400 hover:text-cyan-400 hover:border-cyan-500/50 transition-all z-50"
+            className="absolute -right-3 top-20 w-6 h-6 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-full flex items-center justify-center text-[var(--muted)] hover:text-[var(--primary)] hover:border-[var(--primary)]/50 transition-all z-50"
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             <svg 
@@ -56,7 +56,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       {/* Mobile Sidebar Overlay */}
       {mobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
@@ -81,14 +81,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
         `}
       >
         {/* Top Header Bar */}
-        <header className="sticky top-0 z-30 bg-gray-900/80 backdrop-blur-xl border-b border-gray-800">
+        <header className="sticky top-0 z-30 bg-[var(--sidebar-bg)]/80 backdrop-blur-xl border-b border-[var(--sidebar-border)] transition-colors">
           <div className="flex items-center justify-between h-16 px-4 lg:px-6">
             {/* Left: Mobile Menu Button & Breadcrumb */}
             <div className="flex items-center gap-4">
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden p-2 rounded-lg text-gray-400 hover:text-cyan-400 hover:bg-gray-800 transition-all"
+                className="lg:hidden p-2 rounded-lg text-[var(--muted)] hover:text-[var(--primary)] hover:bg-[var(--charcoal-light)] transition-all"
                 aria-label="Toggle mobile menu"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,25 +116,25 @@ export default function AppLayout({ children }: AppLayoutProps) {
               {isAuthenticated ? (
                 <>
                   {/* Notifications */}
-                  <button className="p-2 rounded-lg text-gray-400 hover:text-cyan-400 hover:bg-gray-800 transition-all relative">
+                  <button className="p-2 rounded-lg text-[var(--muted)] hover:text-[var(--primary)] hover:bg-[var(--charcoal-light)] transition-all relative">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-cyan-400 rounded-full"></span>
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-[var(--primary)] rounded-full"></span>
                   </button>
 
                   {/* User Menu */}
-                  <div className="flex items-center gap-3 pl-3 border-l border-gray-700">
+                  <div className="flex items-center gap-3 pl-3 border-l border-[var(--card-border)]">
                     <div className="hidden sm:block text-right">
-                      <p className="text-sm font-medium text-white">{displayName}</p>
-                      <p className="text-xs text-gray-400">{user?.role || 'User'}</p>
+                      <p className="text-sm font-medium text-[var(--foreground)]">{displayName}</p>
+                      <p className="text-xs text-[var(--muted)]">{user?.role || 'User'}</p>
                     </div>
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-fuchsia-500 flex items-center justify-center text-white font-semibold text-sm">
                       {userInitial}
                     </div>
                     <button
                       onClick={logout}
-                      className="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-gray-800 transition-all"
+                      className="p-2 rounded-lg text-[var(--muted)] hover:text-[var(--danger)] hover:bg-[var(--charcoal-light)] transition-all"
                       title="Logout"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,7 +147,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 <div className="flex items-center gap-2">
                   <Link
                     href="/login"
-                    className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-cyan-400 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-[var(--foreground-muted)] hover:text-[var(--primary)] transition-colors"
                   >
                     Sign In
                   </Link>
@@ -171,10 +171,10 @@ export default function AppLayout({ children }: AppLayoutProps) {
         </main>
 
         {/* Footer */}
-        <footer className="mt-auto py-6 border-t border-gray-800 bg-gray-900/50">
+        <footer className="mt-auto py-6 border-t border-[var(--sidebar-border)] bg-[var(--sidebar-bg)]/50 transition-colors">
           <div className="max-w-7xl mx-auto px-4 lg:px-6">
             <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-[var(--muted)]">
                 © 2026 HabitFlow. Capstone Project - Full Stack Development
               </p>
               <div className="flex items-center space-x-3">

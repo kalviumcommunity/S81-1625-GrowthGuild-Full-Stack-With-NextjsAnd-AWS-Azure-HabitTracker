@@ -47,6 +47,17 @@ const getNotificationStyles = (type: NotificationType) => {
           </svg>
         ),
       };
+    case "loading":
+      return {
+        bgColor: "bg-purple-500/10",
+        borderColor: "border-purple-500/50",
+        textColor: "text-purple-400",
+        iconColor: "text-purple-400",
+        shadowColor: "shadow-purple-500/20",
+        icon: (
+          <div className="w-5 h-5 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+        ),
+      };
     case "info":
     default:
       return {
