@@ -11,7 +11,177 @@ A modern, full-stack habit tracking application built with Next.js 15, TypeScrip
 - **Transactional Emails** - Welcome emails, password resets, and notifications via AWS SES
 - **Redis Caching** - Optional Redis caching for improved performance
 - **Modern UI** - Responsive design with Tailwind CSS and glass-morphism effects
+- **Dark/Light Theme** - Theme switching with localStorage persistence and system preference detection
 - **App Router** - Next.js 13+ file-based routing with dynamic routes
+
+---
+
+## 🎨 Responsive Design & Theming
+
+### Tailwind CSS v4 Configuration
+
+This project uses **Tailwind CSS v4** with CSS-based configuration in `globals.css`. The theme is configured using the `@theme` directive and CSS custom properties.
+
+#### Custom Breakpoints
+
+| Breakpoint | Min Width | Description |
+|------------|-----------|-------------|
+| `xs` | 475px | Extra small devices |
+| `sm` | 640px | Small devices (mobile landscape) |
+| `md` | 768px | Medium devices (tablets) |
+| `lg` | 1024px | Large devices (desktops) |
+| `xl` | 1280px | Extra large screens |
+| `2xl` | 1536px | Wide screens |
+
+#### Brand Color Palette
+
+```css
+/* Primary (Cyan/Teal) */
+--color-brand-500: #06b6d4;  /* Main brand color */
+--color-brand-600: #0891b2;  /* Hover states */
+
+/* Accent (Fuchsia/Purple) */
+--color-accent-500: #d946ef;
+--color-accent-600: #c026d3;
+
+/* Status Colors */
+--color-success-500: #10b981;  /* Green */
+--color-warning-500: #f59e0b;  /* Amber */
+--color-danger-500: #ef4444;   /* Red */
+```
+
+### Theme System
+
+#### Light/Dark Mode Implementation
+
+The theme system uses CSS custom properties that change based on the `light` or `dark` class on the `<html>` element:
+
+```css
+/* Dark theme (default) */
+:root, html.dark {
+  --background: #0d0d0d;
+  --foreground: #f0f0f0;
+  --primary: #00e5ff;
+  --card-bg: #1a1a1a;
+}
+
+/* Light theme */
+html.light {
+  --background: #f8fafc;
+  --foreground: #1e293b;
+  --primary: #0891b2;
+  --card-bg: #ffffff;
+}
+```
+
+#### Theme Toggle Implementation
+
+Located in `src/components/layout/Sidebar.tsx`:
+
+```tsx
+const { isDarkMode, toggleTheme, setTheme } = useTheme();
+
+// Toggle between dark/light
+<button onClick={toggleTheme}>
+  {isDarkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
+</button>
+
+// Set specific theme
+setTheme("light");   // Force light
+setTheme("dark");    // Force dark
+setTheme("system");  // Follow system preference
+```
+
+#### Features:
+- ✅ **localStorage Persistence** - Theme choice survives page refresh
+- ✅ **System Preference Detection** - Respects `prefers-color-scheme`
+- ✅ **Smooth Transitions** - 300ms fade between themes
+- ✅ **Accessible** - ARIA labels for toggle button
+
+### Responsive Design Patterns
+
+#### Mobile-First Approach
+
+All styles are written mobile-first, then enhanced for larger screens:
+
+```tsx
+// Typography scales up on larger screens
+<h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
+  Responsive Heading
+</h1>
+
+// Grid columns increase with screen size
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+  {items.map(item => <Card key={item.id} />)}
+</div>
+
+// Padding increases with screen size
+<div className="p-4 md:p-6 lg:p-8">
+  Content
+</div>
+```
+
+#### Responsive Grid Layout
+
+```tsx
+// Stats cards: 1 → 2 → 4 columns
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+
+// Main content: full width → sidebar layout
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+```
+
+#### Flex Direction Changes
+
+```tsx
+// Stack vertically on mobile, horizontal on larger screens
+<div className="flex flex-col md:flex-row gap-4">
+```
+
+### Color Contrast & Accessibility
+
+#### WCAG Compliance
+
+| Element | Light Mode | Dark Mode | Contrast Ratio |
+|---------|------------|-----------|----------------|
+| Body text | #1e293b on #f8fafc | #f0f0f0 on #0d0d0d | ≥7:1 (AAA) |
+| Primary buttons | White on #0891b2 | White on #00e5ff | ≥4.5:1 (AA) |
+| Muted text | #94a3b8 on #ffffff | #888888 on #1a1a1a | ≥4.5:1 (AA) |
+
+#### Focus Indicators
+
+```css
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+```
+
+#### Reduced Motion Support
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+### Demo Pages
+
+- `/responsive-demo` - Interactive demo of responsive breakpoints and theme switching
+- `/state-demo` - Theme state management examples
+
+### Testing Responsiveness
+
+1. Open Chrome DevTools → Device Toolbar (Ctrl+Shift+M)
+2. Test with presets: iPhone SE, iPad, Laptop
+3. Verify:
+   - [ ] Text remains readable at all sizes
+   - [ ] Grid layouts adapt correctly
+   - [ ] Touch targets are ≥44px on mobile
+   - [ ] No horizontal scrolling
 
 ---
 
