@@ -49,31 +49,32 @@ export default function Sidebar({ className = "", collapsed = false, onLinkClick
   const pathname = usePathname();
   const { isAuthenticated } = useAuth();
 
-  const navigationLinks: SidebarLink[] = [
-    { href: "/", label: "Home", icon: "🏠" },
-    { href: "/dashboard", label: "Dashboard", icon: "📊", requiresAuth: true },
-    { href: "/habits", label: "My Habits", icon: "🎯", requiresAuth: true },
-    { href: "/users", label: "Users", icon: "👥", requiresAuth: true },
-    { href: "/uploads", label: "Uploads", icon: "☁️", requiresAuth: true },
-    { href: "/contact", label: "Contact", icon: "✉️" },
-    { href: "/about", label: "About", icon: "ℹ️" },
-  ];
+  // Navigation links - different for authenticated vs guest users
+  const navigationLinks: SidebarLink[] = isAuthenticated
+    ? [
+        { href: "/dashboard", label: "Dashboard", icon: "📊" },
+        { href: "/habits", label: "My Habits", icon: "🎯" },
+        { href: "/users", label: "Users", icon: "👥" },
+        { href: "/uploads", label: "Uploads", icon: "☁️" },
+        { href: "/contact", label: "Contact", icon: "✉️" },
+        { href: "/about", label: "About", icon: "ℹ️" },
+      ]
+    : [
+        { href: "/", label: "Home", icon: "🏠" },
+        { href: "/contact", label: "Contact", icon: "✉️" },
+        { href: "/about", label: "About", icon: "ℹ️" },
+      ];
 
-  const demoLinks: SidebarLink[] = [
-    { href: "/forms-demo", label: "Forms Demo", icon: "📋" },
-    { href: "/swr-demo", label: "SWR Demo", icon: "🔄" },
-    { href: "/state-demo", label: "State Demo", icon: "⚡" },
-    { href: "/feedback-demo", label: "Feedback Demo", icon: "🔔" },
-  ];
-
-  const filteredLinks = navigationLinks.filter(
-    link => !link.requiresAuth || isAuthenticated
-  );
+  // Demo links are hidden from production sidebar
+  // Files still exist at /forms-demo, /swr-demo, /state-demo, /feedback-demo, /responsive-demo
 
   const quickActions = [
     { label: "New Habit", icon: "➕", href: "/habits" },
     { label: "View Stats", icon: "📈", href: "/dashboard" },
   ];
+
+  // Logo links to dashboard when authenticated, home when guest
+  const logoHref = isAuthenticated ? "/dashboard" : "/";
 
   return (
     <aside 
@@ -90,7 +91,7 @@ export default function Sidebar({ className = "", collapsed = false, onLinkClick
     >
       {/* Logo Section */}
       <div className="p-4 border-b border-[var(--sidebar-border)]">
-        <Link href="/" className="flex items-center space-x-2" onClick={onLinkClick}>
+        <Link href={logoHref} className="flex items-center space-x-2" onClick={onLinkClick}>
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-cyan-500/30 flex-shrink-0">
             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -111,7 +112,7 @@ export default function Sidebar({ className = "", collapsed = false, onLinkClick
             </h2>
           )}
           <ul className="space-y-1" role="list">
-            {filteredLinks.map((link) => {
+            {navigationLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <li key={link.href}>
@@ -155,29 +156,6 @@ export default function Sidebar({ className = "", collapsed = false, onLinkClick
                   >
                     <span className="text-lg" aria-hidden="true">{action.icon}</span>
                     <span className="text-sm">{action.label}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Demo Links Section */}
-        {!collapsed && (
-          <div className="mt-8">
-            <h2 className="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-3 px-3">
-              Demos
-            </h2>
-            <ul className="space-y-1" role="list">
-              {demoLinks.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    onClick={onLinkClick}
-                    className="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-[var(--muted)] hover:bg-[var(--charcoal-light)] hover:text-[var(--secondary)] transition-all duration-200"
-                  >
-                    <span className="text-lg" aria-hidden="true">{link.icon}</span>
-                    <span className="text-sm">{link.label}</span>
                   </Link>
                 </li>
               ))}

@@ -1,8 +1,41 @@
-import { transactionDemo } from "@/lib/transactions";
-import Link from "next/link";
+"use client";
 
-export default async function HomePage() {
-  await transactionDemo();
+import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
+export default function HomePage() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace("/dashboard");
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  // Show loading while checking auth
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary)]"></div>
+      </div>
+    );
+  }
+
+  // If authenticated, show nothing while redirecting
+  if (isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary)] mx-auto mb-4"></div>
+          <p className="text-[var(--muted)]">Redirecting to dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   const features = [
     {
@@ -49,17 +82,17 @@ export default async function HomePage() {
             Build Better Habits,
             <span className="block gradient-text">One Day at a Time</span>
           </h1>
-          <p className="text-lg sm:text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-[var(--muted)] mb-8 max-w-2xl mx-auto">
             Transform your life with HabitFlow - the modern habit tracking app that helps you 
             stay consistent, build streaks, and achieve your goals.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/dashboard" className="btn-primary text-lg px-8 py-4 w-full sm:w-auto">
-              Start Tracking Free →
+            <Link href="/signup" className="btn-primary text-lg px-8 py-4 w-full sm:w-auto">
+              Get Started Free →
             </Link>
-            <Link href="/about" className="btn-secondary text-lg px-8 py-4 w-full sm:w-auto">
-              Learn More
+            <Link href="/login" className="btn-secondary text-lg px-8 py-4 w-full sm:w-auto">
+              Sign In
             </Link>
           </div>
         </div>
@@ -78,7 +111,7 @@ export default async function HomePage() {
                 <div className="text-3xl sm:text-4xl font-bold gradient-text mb-2">
                   {stat.value}
                 </div>
-                <div className="text-sm text-gray-500 font-medium">
+                <div className="text-sm text-[var(--muted)] font-medium">
                   {stat.label}
                 </div>
               </div>
@@ -93,7 +126,7 @@ export default async function HomePage() {
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
             Everything You Need to <span className="gradient-text">Succeed</span>
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <p className="text-[var(--muted)] max-w-2xl mx-auto">
             Powerful features designed to help you build lasting habits and transform your daily routine.
           </p>
         </div>
@@ -106,8 +139,8 @@ export default async function HomePage() {
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="text-4xl mb-4">{feature.icon}</div>
-              <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-              <p className="text-gray-400 text-sm">
+              <h3 className="text-lg font-semibold mb-2 text-[var(--foreground)]">{feature.title}</h3>
+              <p className="text-[var(--muted)] text-sm">
                 {feature.description}
               </p>
             </div>
@@ -136,17 +169,6 @@ export default async function HomePage() {
               </svg>
             </Link>
           </div>
-        </div>
-      </section>
-
-      {/* Tech Stack Info (kept for development) */}
-      <section className="py-4">
-        <div className="glass-card rounded-xl p-4 text-center">
-          <p className="text-xs text-gray-400">
-            Environment: <span className="font-mono">{process.env.NEXT_PUBLIC_APP_ENV ?? "NOT LOADED"}</span>
-            {" | "}
-            API: <span className="font-mono">{process.env.NEXT_PUBLIC_API_URL ?? "NOT LOADED"}</span>
-          </p>
         </div>
       </section>
     </div>
