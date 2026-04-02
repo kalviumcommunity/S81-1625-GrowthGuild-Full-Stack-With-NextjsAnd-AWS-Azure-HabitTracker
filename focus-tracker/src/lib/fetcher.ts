@@ -1,9 +1,44 @@
+import { getAccessToken, refreshAccessToken } from "@/lib/tokenManager";
+
 /**
  * Fetcher Utility for SWR
  * 
  * A reusable fetcher function that handles API requests with proper
  * error handling and authentication token support.
  */
+
+const withAuthHeaders = (headers: HeadersInit = {}) => {
+  const token = typeof window !== "undefined" ? getAccessToken() : null;
+
+  return {
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` }),
+    ...headers,
+  };
+};
+
+const requestWithAuthRetry = async (url: string, options: RequestInit = {}) => {
+  const firstResponse = await fetch(url, {
+    ...options,
+    credentials: "include",
+    headers: withAuthHeaders(options.headers),
+  });
+
+  if (firstResponse.status !== 401) {
+    return firstResponse;
+  }
+
+  const refreshedToken = await refreshAccessToken();
+  if (!refreshedToken) {
+    return firstResponse;
+  }
+
+  return fetch(url, {
+    ...options,
+    credentials: "include",
+    headers: withAuthHeaders(options.headers),
+  });
+};
 
 /**
  * Basic fetcher for GET requests
@@ -19,14 +54,7 @@
  * ```
  */
 export const fetcher = async <T>(url: string): Promise<T> => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  
-  const res = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-    },
-  });
+  const res = await requestWithAuthRetry(url);
 
   if (!res.ok) {
     const error = new Error('An error occurred while fetching the data.');
@@ -59,16 +87,7 @@ export const fetchWithOptions = async <T>(
   url: string,
   options: RequestInit = {}
 ): Promise<T> => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...options.headers,
-    },
-  });
+  const res = await requestWithAuthRetry(url, options);
 
   if (!res.ok) {
     const error = new Error('Request failed');

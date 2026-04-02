@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { prisma } from "@/lib/prisma";
-
-const JWT_SECRET = process.env.JWT_SECRET!;
+import {
+  createAccessToken,
+  createRefreshToken,
+  getRefreshCookieOptions,
+} from "@/lib/authTokens";
 
 export async function POST(req: Request) {
   try {
@@ -29,17 +31,19 @@ export async function POST(req: Request) {
       );
     }
 
-    const token = jwt.sign(
-      { id: user.id, email: user.email,role: user.role },
-      JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+    const tokenPayload = { id: user.id, email: user.email, role: user.role };
+    const accessToken = createAccessToken(tokenPayload);
+    const refreshToken = createRefreshToken(tokenPayload);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: "Login successful",
-      token,
+      accessToken,
     });
+
+    response.cookies.set("refreshToken", refreshToken, getRefreshCookieOptions());
+
+    return response;
   } catch (error) {
     console.error(error);
     return NextResponse.json(

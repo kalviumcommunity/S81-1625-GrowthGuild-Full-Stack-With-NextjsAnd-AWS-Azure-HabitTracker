@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { fetchWithOptions } from "@/lib/fetcher";
 
 interface User {
   id: number;
@@ -29,13 +30,9 @@ export default function UsersPage() {
           await new Promise((resolve) => setTimeout(resolve, 2000));
         }
 
-        const token = localStorage.getItem("token");
-        const response = await fetch("/api/users", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const result = await response.json();
+        const result = await fetchWithOptions<{ success: boolean; data: User[]; message?: string }>(
+          "/api/users"
+        );
 
         if (result.success) {
           setUsers(result.data);
