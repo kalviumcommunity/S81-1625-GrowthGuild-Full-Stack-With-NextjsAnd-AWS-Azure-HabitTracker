@@ -1147,3 +1147,99 @@ Recommended path for evidence assets:
 
 Handling async states with skeletons and error boundaries makes the app feel reliable under real-world conditions where latency and failures are normal. Instead of uncertainty or abrupt crashes, users get clear feedback and a safe path to recover, which directly improves confidence and perceived quality.
 
+---
+
+## ✅ Assignment: JWT Sessions with Refresh Tokens
+
+This app now uses a two-token authentication model with automatic refresh and secure cookie practices.
+
+### JWT Structure
+
+JWTs have 3 parts: `header.payload.signature`
+
+- **Header**: Algorithm and token type metadata.
+- **Payload**: Claims like `id`, `email`, `role`, `type`, and expiry (`exp`).
+- **Signature**: Integrity check using server secrets.
+
+Implemented token payload claims:
+
+- Access token payload: `{ id, email, role, type: "access" }`
+- Refresh token payload: `{ id, email, role, type: "refresh" }`
+
+### Access vs Refresh Tokens
+
+- **Access Token**: Short-lived (default `15m`) and sent in `Authorization: Bearer ...`.
+- **Refresh Token**: Long-lived (default `7d`) and stored in a secure HTTP-only cookie.
+
+Server implementation:
+
+- Login issues both tokens.
+- Refresh endpoint rotates refresh tokens and returns a new access token.
+- Logout clears the refresh token cookie.
+
+### Storage and Security Choices
+
+- Access token is stored **in memory only** (client runtime state), not in `localStorage`.
+- Refresh token is stored in cookie with:
+  - `HttpOnly`
+  - `SameSite=Strict`
+  - `Secure` in production
+  - path-scoped to `/api/auth`
+- Sensitive data (passwords, secrets) is never stored in JWT payloads.
+
+### Refresh Flow and Expiry Handling
+
+Flow:
+
+1. User signs in at `/api/auth/login`.
+2. Server returns `accessToken` and sets `refreshToken` cookie.
+3. Client sends access token in `Authorization` header.
+4. If API returns `401`, client calls `/api/auth/refresh`.
+5. Server verifies refresh cookie, rotates it, returns a new access token.
+6. Client retries original request automatically.
+
+Implemented files:
+
+- `src/lib/authTokens.ts`
+- `src/lib/tokenManager.ts`
+- `src/app/api/auth/login/route.ts`
+- `src/app/api/auth/refresh/route.ts`
+- `src/app/api/auth/logout/route.ts`
+- `src/lib/fetcher.ts`
+- `src/context/AuthContext.tsx`
+
+### Security Risk Reflection (XSS / CSRF / Replay)
+
+- **XSS mitigation**: Refresh token is inaccessible to JavaScript (HTTP-only cookie), and access token is not persisted in browser storage.
+- **CSRF mitigation**: `SameSite=Strict` cookie policy and origin validation on auth cookie endpoints (`/api/auth/refresh`, `/api/auth/logout`).
+- **Replay risk reduction**: Short-lived access token + refresh token rotation on each refresh.
+
+### Evidence / Verification Checklist
+
+Capture screenshots or API client logs for:
+
+- [ ] Successful login response returning `accessToken`
+- [ ] `Set-Cookie` for `refreshToken` with security flags
+- [ ] Expired access token request returning `401`
+- [ ] Successful `/api/auth/refresh` response with new access token
+- [ ] Retried protected request succeeding after refresh
+- [ ] Logout clearing refresh cookie
+
+Recommended asset paths:
+
+- `docs/screenshots/jwt-refresh/login-success.png`
+- `docs/screenshots/jwt-refresh/refresh-cookie-flags.png`
+- `docs/screenshots/jwt-refresh/access-expired-401.png`
+- `docs/screenshots/jwt-refresh/refresh-success.png`
+- `docs/screenshots/jwt-refresh/request-retry-success.png`
+- `docs/screenshots/jwt-refresh/logout-cookie-cleared.png`
+
+### Optional Environment Variables
+
+You can customize token lifetimes with:
+
+- `ACCESS_TOKEN_TTL` (default: `15m`)
+- `REFRESH_TOKEN_TTL` (default: `7d`)
+- `JWT_SECRET` (required)
+- `REFRESH_TOKEN_SECRET` (optional fallback to `JWT_SECRET`)
+

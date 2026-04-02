@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import jwt from "jsonwebtoken";
-
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
+import { verifyAccessToken } from "@/lib/authTokens";
 
 // Public routes that don't require authentication
 const publicRoutes = ["/", "/login", "/signup", "/about"];
-const publicApiRoutes = ["/api/auth/login", "/api/auth/signup"];
+const publicApiRoutes = [
+  "/api/auth/login",
+  "/api/auth/signup",
+  "/api/auth/refresh",
+  "/api/auth/logout",
+];
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -40,7 +43,7 @@ export function middleware(req: NextRequest) {
       }
 
       try {
-        const decoded: any = jwt.verify(token, JWT_SECRET);
+        const decoded = verifyAccessToken(token);
 
         // Admin-only check
         if (pathname.startsWith("/api/admin") && decoded.role !== "admin") {
@@ -52,7 +55,7 @@ export function middleware(req: NextRequest) {
 
         // Attach user info to headers
         const headers = new Headers(req.headers);
-        headers.set("x-user-id", decoded.id);
+        headers.set("x-user-id", String(decoded.id));
         headers.set("x-user-role", decoded.role);
 
         return NextResponse.next({ request: { headers } });

@@ -5,6 +5,7 @@ import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { use } from "react";
+import { fetchWithOptions } from "@/lib/fetcher";
 
 interface User {
   id: number;
@@ -44,25 +45,19 @@ export default function UserProfilePage({ params }: UserProfileProps) {
           await new Promise((resolve) => setTimeout(resolve, 2000));
         }
 
-        const token = localStorage.getItem("token");
-        
         // Fetch user details
-        const userResponse = await fetch(`/api/users/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        
-        if (!userResponse.ok) {
-          if (userResponse.status === 404) {
+        let userData;
+        try {
+          userData = await fetchWithOptions<{ success: boolean; data: User; message?: string }>(`/api/users/${id}`);
+        } catch (requestError: any) {
+          if (requestError?.status === 404) {
             setError("User not found");
             setLoading(false);
             return;
           }
+
           throw new Error("Failed to fetch user");
         }
-
-        const userData = await userResponse.json();
         
         if (userData.success) {
           setUser(userData.data);
@@ -71,13 +66,9 @@ export default function UserProfilePage({ params }: UserProfileProps) {
         }
 
         // Fetch user's habits
-        const habitsResponse = await fetch(`/api/habits?userId=${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        
-        const habitsData = await habitsResponse.json();
+        const habitsData = await fetchWithOptions<{ success: boolean; data: Habit[] }>(
+          `/api/habits?userId=${id}`
+        );
         if (habitsData.success) {
           setHabits(habitsData.data || []);
         }

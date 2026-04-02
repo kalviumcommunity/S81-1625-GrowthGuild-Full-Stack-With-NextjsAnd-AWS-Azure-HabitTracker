@@ -2,6 +2,12 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import {
+  clearAccessToken,
+  refreshAccessToken,
+  setAccessToken,
+  subscribeToTokenChanges,
+} from "@/lib/tokenManager";
 
 /**
  * User interface representing authenticated user data
@@ -20,8 +26,8 @@ export interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (token: string) => void;
-  logout: () => void;
+  login: (token: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,32 +42,70 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Check for existing token on mount
+  const parseToken = (rawToken: string) => {
+    const payload = JSON.parse(atob(rawToken.split(".")[1]));
+    return {
+      id: payload.id,
+      email: payload.email,
+      role: payload.role,
+      exp: payload.exp,
+    };
+  };
+
+  // Sync React state with in-memory token manager
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    if (storedToken) {
+    const unsubscribe = subscribeToTokenChanges((nextToken) => {
+      if (!nextToken) {
+        setToken(null);
+        setUser(null);
+        return;
+      }
+
       try {
-        // Decode JWT to get user info (without verification - that's done server-side)
-        const payload = JSON.parse(atob(storedToken.split(".")[1]));
-        
-        // Check if token is expired
-        if (payload.exp * 1000 > Date.now()) {
-          setToken(storedToken);
-          setUser({
-            id: payload.id,
-            email: payload.email,
-            role: payload.role,
-          });
-        } else {
-          // Token expired, clear it
-          localStorage.removeItem("token");
+        const payload = parseToken(nextToken);
+
+        if (payload.exp * 1000 <= Date.now()) {
+          clearAccessToken();
+          return;
         }
+
+        setToken(nextToken);
+        setUser({
+          id: payload.id,
+          email: payload.email,
+          role: payload.role,
+        });
       } catch (error) {
         console.error("Invalid token:", error);
-        localStorage.removeItem("token");
+        clearAccessToken();
       }
-    }
-    setIsLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  // Bootstrap session using refresh token cookie
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      try {
+        const newToken = await refreshAccessToken();
+        if (mounted && newToken) {
+          setAccessToken(newToken);
+        }
+      } catch (error) {
+        console.error("Session bootstrap failed:", error);
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Protect routes
@@ -76,12 +120,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [token, pathname, isLoading, router]);
 
-  const login = (newToken: string) => {
-    localStorage.setItem("token", newToken);
-    setToken(newToken);
-    
+  const login = async (newToken: string) => {
+    setAccessToken(newToken);
+
     try {
-      const payload = JSON.parse(atob(newToken.split(".")[1]));
+      const payload = parseToken(newToken);
       setUser({
         id: payload.id,
         email: payload.email,
@@ -92,10 +135,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    setToken(null);
-    setUser(null);
+  const logout = async () => {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+    } catch (error) {
+      console.error("Logout request failed:", error);
+    }
+
+    clearAccessToken();
     router.push("/login");
   };
 

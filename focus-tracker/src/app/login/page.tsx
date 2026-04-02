@@ -73,8 +73,8 @@ export default function LoginPage() {
         return;
       }
 
-      // Use auth context to login
-      login(result.token);
+      // Use auth context to login with short-lived access token
+      await login(result.accessToken);
       
       // Redirect to original destination or dashboard
       const redirect = searchParams.get("redirect") || "/dashboard";
