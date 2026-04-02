@@ -9,9 +9,35 @@ import {
   ALLOWED_FILE_TYPES,
   MAX_FILE_SIZE,
 } from "@/lib/s3";
+import {
+  checkPermission,
+  getRequestActor,
+  unauthorizedResponse,
+} from "@/lib/rbac";
 
 export async function POST(req: Request) {
   try {
+    const actor = getRequestActor(req);
+    if (!actor) {
+      return unauthorizedResponse();
+    }
+
+    const canUpload = checkPermission({
+      actor,
+      permission: "upload_files",
+      resource: "uploads",
+      action: "create_presigned_url",
+      targetUserId: actor.userId,
+      allowOwner: true,
+    });
+
+    if (!canUpload) {
+      return NextResponse.json(
+        { success: false, message: "Access denied: insufficient permissions" },
+        { status: 403 }
+      );
+    }
+
     // Check if S3 is configured
     if (!isS3Configured()) {
       return NextResponse.json(
@@ -25,6 +51,7 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const { filename, fileType, fileSize, userId } = body;
+    const effectiveUserId = actor.role === "admin" && userId ? userId : actor.userId;
 
     // Validate required fields
     if (!filename || !fileType) {
@@ -60,7 +87,7 @@ export async function POST(req: Request) {
     }
 
     // Generate unique file key
-    const key = generateFileKey(filename, userId);
+    const key = generateFileKey(filename, effectiveUserId);
 
     // Generate pre-signed URL (expires in 60 seconds)
     const uploadUrl = await generatePresignedUploadUrl(key, fileType, 60);

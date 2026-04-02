@@ -1,9 +1,33 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { safeRedisGet, safeRedisSet } from "@/lib/redis";
+import {
+  checkPermission,
+  getRequestActor,
+  unauthorizedResponse,
+} from "@/lib/rbac";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const actor = getRequestActor(req);
+    if (!actor) {
+      return unauthorizedResponse();
+    }
+
+    const canReadUsers = checkPermission({
+      actor,
+      permission: "read_users",
+      resource: "users",
+      action: "list",
+    });
+
+    if (!canReadUsers) {
+      return NextResponse.json(
+        { success: false, message: "Access denied: insufficient permissions" },
+        { status: 403 }
+      );
+    }
+
     const cacheKey = "users:list";
 
     // 1️⃣ Check cache (returns null if Redis unavailable)

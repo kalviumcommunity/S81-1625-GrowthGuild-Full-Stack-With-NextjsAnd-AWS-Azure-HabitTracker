@@ -1,12 +1,22 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import {
+  checkPermission,
+  getRequestActor,
+  unauthorizedResponse,
+} from "@/lib/rbac";
 
 // GET /api/habits/:id
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const actor = getRequestActor(req);
+    if (!actor) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await params;
     const habit = await prisma.habit.findUnique({
       where: { id: Number(id) },
@@ -22,6 +32,22 @@ export async function GET(
       return NextResponse.json({ success: false, message: "Habit not found" }, { status: 404 });
     }
 
+    const canRead = checkPermission({
+      actor,
+      permission: "read_habits",
+      resource: "habit",
+      action: "read",
+      targetUserId: habit.userId,
+      allowOwner: true,
+    });
+
+    if (!canRead) {
+      return NextResponse.json(
+        { success: false, message: "Access denied: insufficient permissions" },
+        { status: 403 }
+      );
+    }
+
     return NextResponse.json({ success: true, data: habit }, { status: 200 });
   } catch (error) {
     console.error("Get habit error:", error);
@@ -35,8 +61,38 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const actor = getRequestActor(req);
+    if (!actor) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await params;
     const body = await req.json();
+
+    const existingHabit = await prisma.habit.findUnique({
+      where: { id: Number(id) },
+      select: { id: true, userId: true },
+    });
+
+    if (!existingHabit) {
+      return NextResponse.json({ success: false, message: "Habit not found" }, { status: 404 });
+    }
+
+    const canUpdate = checkPermission({
+      actor,
+      permission: "update_habits",
+      resource: "habit",
+      action: "update",
+      targetUserId: existingHabit.userId,
+      allowOwner: true,
+    });
+
+    if (!canUpdate) {
+      return NextResponse.json(
+        { success: false, message: "Access denied: insufficient permissions" },
+        { status: 403 }
+      );
+    }
 
     const habit = await prisma.habit.update({
       where: { id: Number(id) },
@@ -57,11 +113,40 @@ export async function PUT(
 
 // DELETE /api/habits/:id
 export async function DELETE(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const actor = getRequestActor(req);
+    if (!actor) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await params;
+
+    const existingHabit = await prisma.habit.findUnique({
+      where: { id: Number(id) },
+      select: { id: true, userId: true },
+    });
+
+    if (!existingHabit) {
+      return NextResponse.json({ success: false, message: "Habit not found" }, { status: 404 });
+    }
+
+    const canDelete = checkPermission({
+      actor,
+      permission: "delete_habits",
+      resource: "habit",
+      action: "delete",
+      targetUserId: existingHabit.userId,
+    });
+
+    if (!canDelete) {
+      return NextResponse.json(
+        { success: false, message: "Access denied: only admins can delete habits" },
+        { status: 403 }
+      );
+    }
 
     // Delete associated logs first (if cascade isn't set up)
     await prisma.habitLog.deleteMany({

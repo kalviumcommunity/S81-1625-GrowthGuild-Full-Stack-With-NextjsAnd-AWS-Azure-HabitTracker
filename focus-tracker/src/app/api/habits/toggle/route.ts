@@ -1,15 +1,25 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import {
+  checkPermission,
+  getRequestActor,
+  unauthorizedResponse,
+} from "@/lib/rbac";
 
 // POST /api/habits/toggle - Toggle habit completion for a specific date
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { habitId, userId, date } = body;
+    const actor = getRequestActor(req);
+    if (!actor) {
+      return unauthorizedResponse();
+    }
 
-    if (!habitId || !userId) {
+    const body = await req.json();
+    const { habitId, date } = body;
+
+    if (!habitId) {
       return NextResponse.json(
-        { success: false, message: "Habit ID and User ID are required" },
+        { success: false, message: "Habit ID is required" },
         { status: 400 }
       );
     }
@@ -22,14 +32,29 @@ export async function POST(req: Request) {
     const habit = await prisma.habit.findFirst({
       where: {
         id: parseInt(habitId),
-        userId: parseInt(userId),
       },
     });
 
     if (!habit) {
       return NextResponse.json(
-        { success: false, message: "Habit not found or doesn't belong to user" },
+        { success: false, message: "Habit not found" },
         { status: 404 }
+      );
+    }
+
+    const canUpdate = checkPermission({
+      actor,
+      permission: "update_habits",
+      resource: "habit",
+      action: "toggle",
+      targetUserId: habit.userId,
+      allowOwner: true,
+    });
+
+    if (!canUpdate) {
+      return NextResponse.json(
+        { success: false, message: "Access denied: insufficient permissions" },
+        { status: 403 }
       );
     }
 

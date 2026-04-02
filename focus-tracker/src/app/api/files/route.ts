@@ -1,16 +1,42 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { deleteFile } from "@/lib/s3";
+import {
+  checkPermission,
+  getRequestActor,
+  unauthorizedResponse,
+} from "@/lib/rbac";
 
 // GET - List all files (with optional filtering by user)
 export async function GET(req: Request) {
   try {
+    const actor = getRequestActor(req);
+    if (!actor) {
+      return unauthorizedResponse();
+    }
+
+    const canReadFiles = checkPermission({
+      actor,
+      permission: "read_files",
+      resource: "files",
+      action: "list",
+    });
+
+    if (!canReadFiles) {
+      return NextResponse.json(
+        { success: false, message: "Access denied: insufficient permissions" },
+        { status: 403 }
+      );
+    }
+
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
     const limit = parseInt(searchParams.get("limit") || "50");
     const offset = parseInt(searchParams.get("offset") || "0");
 
-    const where = userId ? { uploadedBy: parseInt(userId) } : {};
+    const requestedUserId = userId ? parseInt(userId) : actor.userId;
+    const effectiveUserId = actor.role === "admin" ? requestedUserId : actor.userId;
+    const where = { uploadedBy: effectiveUserId };
 
     const [files, total] = await Promise.all([
       prisma.file.findMany({
@@ -49,8 +75,30 @@ export async function GET(req: Request) {
 // POST - Store file metadata after successful upload
 export async function POST(req: Request) {
   try {
+    const actor = getRequestActor(req);
+    if (!actor) {
+      return unauthorizedResponse();
+    }
+
+    const canUploadFiles = checkPermission({
+      actor,
+      permission: "upload_files",
+      resource: "files",
+      action: "create_metadata",
+      targetUserId: actor.userId,
+      allowOwner: true,
+    });
+
+    if (!canUploadFiles) {
+      return NextResponse.json(
+        { success: false, message: "Access denied: insufficient permissions" },
+        { status: 403 }
+      );
+    }
+
     const body = await req.json();
     const { name, key, url, fileType, size, uploadedBy } = body;
+    const effectiveUploadedBy = actor.role === "admin" && uploadedBy ? uploadedBy : actor.userId;
 
     // Validate required fields
     if (!name || !key || !url || !fileType) {
@@ -83,7 +131,7 @@ export async function POST(req: Request) {
         url,
         fileType,
         size: size || null,
-        uploadedBy: uploadedBy || null,
+        uploadedBy: effectiveUploadedBy,
       },
       include: {
         user: {
@@ -113,6 +161,11 @@ export async function POST(req: Request) {
 // DELETE - Delete a file by ID
 export async function DELETE(req: Request) {
   try {
+    const actor = getRequestActor(req);
+    if (!actor) {
+      return unauthorizedResponse();
+    }
+
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
@@ -132,6 +185,30 @@ export async function DELETE(req: Request) {
       return NextResponse.json(
         { success: false, message: "File not found" },
         { status: 404 }
+      );
+    }
+
+    const canDeleteAnyFile = checkPermission({
+      actor,
+      permission: "delete_any_file",
+      resource: "files",
+      action: "delete",
+      targetUserId: file.uploadedBy || undefined,
+    });
+
+    const canDeleteOwnFile = checkPermission({
+      actor,
+      permission: "delete_own_file",
+      resource: "files",
+      action: "delete",
+      targetUserId: file.uploadedBy || undefined,
+      allowOwner: true,
+    });
+
+    if (!canDeleteAnyFile && !canDeleteOwnFile) {
+      return NextResponse.json(
+        { success: false, message: "Access denied: insufficient permissions" },
+        { status: 403 }
       );
     }
 

@@ -1,9 +1,19 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import {
+  checkPermission,
+  getRequestActor,
+  unauthorizedResponse,
+} from "@/lib/rbac";
 
 // GET /api/dashboard/stats?userId=1
 export async function GET(req: Request) {
   try {
+    const actor = getRequestActor(req);
+    if (!actor) {
+      return unauthorizedResponse();
+    }
+
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
 
@@ -14,7 +24,24 @@ export async function GET(req: Request) {
       );
     }
 
-    const userIdNum = parseInt(userId);
+    const requestedUserId = parseInt(userId);
+    const canViewDashboard = checkPermission({
+      actor,
+      permission: "view_dashboard",
+      resource: "dashboard",
+      action: "read",
+      targetUserId: requestedUserId,
+      allowOwner: true,
+    });
+
+    if (!canViewDashboard) {
+      return NextResponse.json(
+        { success: false, message: "Access denied: insufficient permissions" },
+        { status: 403 }
+      );
+    }
+
+    const userIdNum = actor.role === "admin" ? requestedUserId : actor.userId;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 

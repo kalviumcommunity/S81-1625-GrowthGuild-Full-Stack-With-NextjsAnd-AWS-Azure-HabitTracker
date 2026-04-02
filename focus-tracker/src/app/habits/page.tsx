@@ -6,6 +6,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { useAuth } from "@/context/AuthContext";
 import { useNotification } from "@/context/NotificationContext";
 import { ConfirmDialog, useConfirmDialog } from "@/components/ui";
+import { fetchWithOptions } from "@/lib/fetcher";
+import { hasPermission, normalizeRole } from "@/lib/rbac";
 
 interface HabitLog {
   id: number;
@@ -35,13 +37,17 @@ export default function HabitsPage() {
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<number | null>(null);
   const [habitToDelete, setHabitToDelete] = useState<Habit | null>(null);
+  const normalizedRole = normalizeRole(user?.role);
+  const canCreateHabit = hasPermission(normalizedRole, "create_habit");
+  const canDeleteHabit = hasPermission(normalizedRole, "delete_habits");
 
   const fetchHabits = useCallback(async () => {
     if (!user?.id) return;
 
     try {
-      const response = await fetch(`/api/habits?userId=${user.id}`);
-      const result = await response.json();
+      const result = await fetchWithOptions<{ success: boolean; data: Habit[] }>(
+        `/api/habits?userId=${user.id}`
+      );
 
       if (result.success) {
         setHabits(result.data);
@@ -59,13 +65,12 @@ export default function HabitsPage() {
 
   const createHabit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user?.id || !newHabit.title.trim() || creating) return;
+    if (!user?.id || !newHabit.title.trim() || creating || !canCreateHabit) return;
 
     setCreating(true);
     try {
-      const response = await fetch("/api/habits", {
+      const result = await fetchWithOptions<{ success: boolean; message?: string }>("/api/habits", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: newHabit.title,
           description: newHabit.description,
@@ -73,8 +78,6 @@ export default function HabitsPage() {
           userId: user.id,
         }),
       });
-
-      const result = await response.json();
 
       if (result.success) {
         setShowCreateModal(false);
@@ -93,15 +96,14 @@ export default function HabitsPage() {
   };
 
   const deleteHabit = async (habitId: number) => {
-    if (deleting) return;
+    if (deleting || !canDeleteHabit) return;
 
     setDeleting(habitId);
     try {
-      const response = await fetch(`/api/habits/${habitId}`, {
+      const response = await fetchWithOptions<{ success: boolean; message?: string }>(`/api/habits/${habitId}`, {
         method: "DELETE",
       });
-
-      const result = await response.json();
+      const result = response;
 
       if (result.success) {
         success("Habit Deleted!", `"${habitToDelete?.title}" has been removed.`);
@@ -202,15 +204,21 @@ export default function HabitsPage() {
             Create and manage your personal habits
           </p>
         </div>
-        <button 
-          onClick={() => setShowCreateModal(true)}
-          className="btn-primary flex items-center justify-center space-x-2"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          <span>Add New Habit</span>
-        </button>
+        {canCreateHabit ? (
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="btn-primary flex items-center justify-center space-x-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Add New Habit</span>
+          </button>
+        ) : (
+          <div className="px-4 py-2 rounded-xl border border-amber-400/30 bg-amber-400/10 text-amber-300 text-sm">
+            Read-only role: habit creation disabled
+          </div>
+        )}
       </div>
 
       {/* Categories */}
@@ -247,12 +255,14 @@ export default function HabitsPage() {
           <p className="text-gray-400 mb-6">
             Start building better habits by creating your first one.
           </p>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="inline-block px-6 py-3 bg-gradient-to-r from-cyan-500 to-fuchsia-600 text-white rounded-xl font-medium hover:opacity-90 transition-opacity shadow-lg shadow-cyan-500/20"
-          >
-            Create Your First Habit
-          </button>
+          {canCreateHabit && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="inline-block px-6 py-3 bg-gradient-to-r from-cyan-500 to-fuchsia-600 text-white rounded-xl font-medium hover:opacity-90 transition-opacity shadow-lg shadow-cyan-500/20"
+            >
+              Create Your First Habit
+            </button>
+          )}
         </div>
       )}
 
@@ -276,22 +286,24 @@ export default function HabitsPage() {
                   </div>
                   <div className="flex items-center space-x-2">
                     <span className="badge badge-primary">{habit.frequency}</span>
-                    <button
-                      onClick={() => openDeleteDialog(habit)}
-                      disabled={deleting === habit.id}
-                      className="text-gray-400 hover:text-red-500 transition-colors p-1"
-                      title="Delete habit"
-                    >
-                      {deleting === habit.id ? (
-                        <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                      ) : (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      )}
-                    </button>
+                    {canDeleteHabit && (
+                      <button
+                        onClick={() => openDeleteDialog(habit)}
+                        disabled={deleting === habit.id}
+                        className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                        title="Delete habit"
+                      >
+                        {deleting === habit.id ? (
+                          <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                          </svg>
+                        ) : (
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        )}
+                      </button>
+                    )}
                   </div>
                 </div>
                 
