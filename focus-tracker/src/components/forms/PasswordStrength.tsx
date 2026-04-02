@@ -49,7 +49,7 @@ export default function PasswordStrength({
 }: PasswordStrengthProps) {
   const strengthLevel = useMemo((): StrengthLevel => {
     if (!password || password.length === 0) {
-      return { strength: 0, label: "", color: "bg-gray-700", textColor: "text-gray-500" };
+      return { strength: 0, label: "", color: "bg-[var(--border)]", textColor: "text-[var(--muted)]" };
     }
 
     let score = 0;
@@ -88,7 +88,7 @@ export default function PasswordStrength({
       {/* Strength Label */}
       {showLabel && (
         <div className="flex justify-between items-center text-xs">
-          <span className="text-gray-500">Password strength</span>
+          <span className="text-[var(--muted)]">Password strength</span>
           <span className={`font-medium ${strengthLevel.textColor}`}>
             {strengthLevel.label}
           </span>
@@ -96,7 +96,7 @@ export default function PasswordStrength({
       )}
 
       {/* Strength Bar */}
-      <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
+      <div className="h-1.5 bg-[var(--border)] rounded-full overflow-hidden">
         <div
           className={`h-full ${strengthLevel.color} transition-all duration-300 ease-out`}
           style={{ width: `${strengthLevel.strength}%` }}
@@ -109,7 +109,7 @@ export default function PasswordStrength({
       </div>
 
       {/* Requirements */}
-      <div className="grid grid-cols-2 gap-1 text-xs text-gray-500">
+      <div className="grid grid-cols-2 gap-1 text-xs text-[var(--muted)]">
         <PasswordRequirement met={password.length >= 6} text="6+ characters" />
         <PasswordRequirement met={/[A-Z]/.test(password)} text="Uppercase" />
         <PasswordRequirement met={/[a-z]/.test(password)} text="Lowercase" />
@@ -124,7 +124,7 @@ export default function PasswordStrength({
  */
 function PasswordRequirement({ met, text }: { met: boolean; text: string }) {
   return (
-    <div className={`flex items-center gap-1 ${met ? "text-green-400" : "text-gray-500"}`}>
+    <div className={`flex items-center gap-1 ${met ? "text-green-400" : "text-[var(--muted)]"}`}>
       {met ? (
         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />

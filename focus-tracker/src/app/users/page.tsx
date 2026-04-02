@@ -21,6 +21,14 @@ export default function UsersPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
+        const shouldSimulateDelay =
+          typeof window !== "undefined" &&
+          new URLSearchParams(window.location.search).get("demoSlow") === "1";
+
+        if (shouldSimulateDelay) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+        }
+
         const token = localStorage.getItem("token");
         const response = await fetch("/api/users", {
           headers: {
@@ -50,6 +58,10 @@ export default function UsersPage() {
     { label: "Users", href: "/users" },
   ];
 
+  if (!loading && error) {
+    throw new Error(error);
+  }
+
   return (
     <ProtectedRoute>
       <div className="space-y-8 animate-fade-in-up">
@@ -71,18 +83,22 @@ export default function UsersPage() {
 
         {/* Loading State */}
         {loading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-              <p className="mt-4 text-gray-500">Loading users...</p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="stat-card space-y-4">
+                <div className="flex items-start space-x-4">
+                  <div className="w-14 h-14 rounded-2xl bg-gray-200 dark:bg-gray-800"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-5 w-2/3 rounded bg-gray-200 dark:bg-gray-800"></div>
+                    <div className="h-4 w-full rounded bg-gray-200 dark:bg-gray-800"></div>
+                    <div className="h-4 w-1/2 rounded bg-gray-200 dark:bg-gray-800"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            <div className="md:col-span-2 lg:col-span-3 text-center text-sm text-gray-500 dark:text-gray-400 pt-2">
+              Loading users...
             </div>
-          </div>
-        )}
-
-        {/* Error State */}
-        {error && !loading && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 text-center">
-            <p className="text-red-600 dark:text-red-400">{error}</p>
           </div>
         )}
 

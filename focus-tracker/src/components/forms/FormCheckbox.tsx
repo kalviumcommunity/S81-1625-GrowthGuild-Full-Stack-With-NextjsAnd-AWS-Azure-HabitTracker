@@ -77,10 +77,10 @@ const FormCheckbox = forwardRef<HTMLInputElement, FormCheckboxProps>(
               className={`
                 w-5 h-5 rounded border-2 cursor-pointer
                 transition-all duration-200
-                bg-gray-800/50 
+                bg-[var(--card)]/80 
                 ${hasError
                   ? "border-red-500/50 focus:ring-red-500/20"
-                  : "border-gray-600 focus:ring-cyan-500/20"
+                  : "border-[var(--border)] focus:ring-cyan-500/20"
                 }
                 checked:bg-cyan-500 checked:border-cyan-500
                 focus:ring-2 focus:outline-none
@@ -100,7 +100,7 @@ const FormCheckbox = forwardRef<HTMLInputElement, FormCheckboxProps>(
             htmlFor={inputId}
             className={`
               ml-3 text-sm cursor-pointer
-              ${hasError ? "text-red-400" : "text-gray-300"}
+              ${hasError ? "text-red-400" : "text-[var(--foreground)]"}
             `}
           >
             {label}
@@ -136,7 +136,7 @@ const FormCheckbox = forwardRef<HTMLInputElement, FormCheckboxProps>(
         {helperText && !hasError && (
           <p
             id={`${inputId}-helper`}
-            className="text-sm text-gray-500 ml-8"
+            className="text-sm text-[var(--muted)] ml-8"
           >
             {helperText}
           </p>

@@ -125,8 +125,11 @@ html.dark {
   --accent: #ffd700;
   --success: #00ff88;
   --danger: #ff4757;
+  --card: #1a1a1a;
   --card-bg: #1a1a1a;
   --card-border: #2d2d2d;
+  --card-hover: #252525;
+  --border: #374151;
   --muted: #888888;
   --charcoal: #1e1e1e;
   --charcoal-light: #252525;
@@ -161,9 +164,12 @@ html.light {
   --accent: #f59e0b;
   --success: #10b981;
   --danger: #ef4444;
+  --card: #ffffff;
   --card-bg: #ffffff;
   --card-border: #e2e8f0;
-  --muted: #94a3b8;
+  --card-hover: #f1f5f9;
+  --border: #e2e8f0;
+  --muted: #64748b;
   --charcoal: #f1f5f9;
   --charcoal-light: #e2e8f0;
   --sidebar-bg: #ffffff;
