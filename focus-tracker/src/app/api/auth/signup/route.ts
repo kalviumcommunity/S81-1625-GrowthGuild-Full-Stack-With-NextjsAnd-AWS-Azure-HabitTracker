@@ -4,20 +4,31 @@ import { prisma } from "@/lib/prisma";
 import { safeRedisDel } from "@/lib/redis";
 import { sendEmail, isSESConfigured } from "@/lib/email";
 import { welcomeEmailTemplate } from "@/lib/emailTemplates";
+import { detectSqliRisk, sanitizeEmail, sanitizeInput } from "@/lib/security";
 
 export async function POST(req: Request) {
   try {
     const { name, email, password } = await req.json();
+    const cleanName = sanitizeInput(name);
+    const cleanEmail = sanitizeEmail(email);
+    const cleanPassword = sanitizeInput(password);
 
-    if (!name || !email || !password) {
+    if (!cleanName || !cleanEmail || !cleanPassword) {
       return NextResponse.json(
         { success: false, message: "All fields are required" },
         { status: 400 }
       );
     }
 
+    if ([cleanName, cleanEmail].some(detectSqliRisk)) {
+      return NextResponse.json(
+        { success: false, message: "Input rejected by security policy" },
+        { status: 400 }
+      );
+    }
+
     const existingUser = await prisma.user.findUnique({
-      where: { email },
+      where: { email: cleanEmail },
     });
 
     if (existingUser) {
@@ -27,12 +38,12 @@ export async function POST(req: Request) {
       );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(cleanPassword, 10);
 
     const user = await prisma.user.create({
       data: {
-        name,
-        email,
+        name: cleanName,
+        email: cleanEmail,
         password: hashedPassword,
       },
       select: {
@@ -47,9 +58,9 @@ export async function POST(req: Request) {
 
     // Send welcome email (non-blocking, don't fail signup if email fails)
     if (isSESConfigured()) {
-      const welcomeEmail = welcomeEmailTemplate(name);
+      const welcomeEmail = welcomeEmailTemplate(cleanName);
       sendEmail({
-        to: email,
+        to: cleanEmail,
         subject: welcomeEmail.subject,
         html: welcomeEmail.html,
         text: welcomeEmail.text,

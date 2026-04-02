@@ -1327,3 +1327,89 @@ Recommended evidence folder:
 
 This RBAC design scales because policy definitions are centralized and reused by both backend and frontend. Auditing is built in through explicit allow/deny decision logs for every protected operation. For more complex systems, this model can evolve into policy-based access control (PBAC/ABAC) by adding contextual attributes (tenant, resource sensitivity, environment) to the same evaluation pipeline.
 
+---
+
+## ✅ Assignment: XSS and SQL Injection Defense (OWASP)
+
+This project now includes centralized sanitization, output encoding, and SQLi-pattern detection utilities applied across API routes.
+
+### OWASP-focused Security Utility
+
+Implemented in `src/lib/security.ts`:
+
+- `sanitizeInput`: strips all HTML tags for plain-text fields.
+- `sanitizeRichText`: allows only safe formatting tags.
+- `encodeOutput`: escapes output entities for safe rendering contexts.
+- `detectSqliRisk`: detects common SQL injection signatures.
+- `parseSafeInt`: safe integer parsing for query/body numeric values.
+- `serializeJsonForHtmlScript`: escapes JSON-LD script output safely.
+
+Libraries used:
+
+- `sanitize-html`
+- `validator`
+
+### Where Sanitization Is Enforced
+
+Sanitized and validated untrusted inputs in:
+
+- `src/app/api/auth/login/route.ts`
+- `src/app/api/auth/signup/route.ts`
+- `src/app/api/habits/route.ts`
+- `src/app/api/users/[id]/route.ts`
+- `src/app/api/upload/route.ts`
+- `src/app/api/files/route.ts`
+- `src/app/api/email/route.ts`
+
+Output encoding hardening:
+
+- `src/components/Breadcrumbs.tsx`
+  - JSON-LD script now uses safe serialization to prevent script-context injection.
+
+### SQL Injection Prevention Approach
+
+- Prisma ORM queries remain parameterized (no raw string concatenation).
+- Input fields and numeric query params are sanitized before use.
+- Suspicious SQLi patterns are rejected early with `400` responses.
+
+### Before/After Demonstration
+
+Added demo API and page:
+
+- `src/app/api/security/sanitize/route.ts`
+- `src/app/security-demo/page.tsx`
+
+Use payloads like:
+
+- `<script>alert("Hacked!")</script>`
+- `' OR 1=1 --`
+
+The demo returns:
+
+- original input
+- sanitized plain output
+- encoded output
+- detection flags for script and SQLi patterns
+
+### Evidence Checklist
+
+Capture screenshots or logs for:
+
+- [ ] Before input with script payload in security demo
+- [ ] After sanitized output with script removed/escaped
+- [ ] SQLi-like payload flagged by detector
+- [ ] API request rejected (400) for blocked malicious input
+- [ ] Normal safe input accepted and processed
+
+Recommended evidence path:
+
+- `docs/screenshots/security/xss-before.png`
+- `docs/screenshots/security/xss-after.png`
+- `docs/screenshots/security/sqli-detected.png`
+- `docs/screenshots/security/rejected-request.png`
+- `docs/screenshots/security/safe-request-success.png`
+
+### Reflection
+
+These controls matter because every external input source is untrusted by default. Sanitization, encoding, and strict validation reduce exploitability for XSS/SQLi while keeping behavior predictable. Ongoing security posture should include periodic dependency audits, CSP and secure headers, schema-based validation expansion, and recurring review of all new input paths.
+

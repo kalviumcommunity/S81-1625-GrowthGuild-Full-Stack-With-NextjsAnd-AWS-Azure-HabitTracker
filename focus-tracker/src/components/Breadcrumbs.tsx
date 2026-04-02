@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { serializeJsonForHtmlScript } from "@/lib/security";
 
 interface BreadcrumbItem {
   label: string;
@@ -55,7 +56,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: serializeJsonForHtmlScript({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: items.map((item, index) => ({

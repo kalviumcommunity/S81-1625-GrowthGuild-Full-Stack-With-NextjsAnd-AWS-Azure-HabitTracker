@@ -5,6 +5,7 @@ import {
   getRequestActor,
   unauthorizedResponse,
 } from "@/lib/rbac";
+import { detectSqliRisk, sanitizeEmail, sanitizeInput } from "@/lib/security";
 
 // GET /api/users/:id - Get a single user by ID
 export async function GET(
@@ -89,13 +90,30 @@ export async function PUT(
 
     const { id } = await params;
     const body = await req.json();
+    const cleanName = sanitizeInput(body.name || "");
+    const cleanEmail = sanitizeEmail(body.email || "");
+    const cleanRole = sanitizeInput(body.role || "");
+
+    if (!cleanName || !cleanEmail || !cleanRole) {
+      return NextResponse.json(
+        { success: false, message: "name, email and role are required" },
+        { status: 400 }
+      );
+    }
+
+    if ([cleanName, cleanEmail, cleanRole].some(detectSqliRisk)) {
+      return NextResponse.json(
+        { success: false, message: "Input rejected by security policy" },
+        { status: 400 }
+      );
+    }
 
     const user = await prisma.user.update({
       where: { id: Number(id) },
       data: {
-        name: body.name,
-        email: body.email,
-        role: body.role,
+        name: cleanName,
+        email: cleanEmail,
+        role: cleanRole,
       },
       select: {
         id: true,
