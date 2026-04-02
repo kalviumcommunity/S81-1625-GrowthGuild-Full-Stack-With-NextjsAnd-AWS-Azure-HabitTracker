@@ -6,13 +6,30 @@ import {
   createRefreshToken,
   getRefreshCookieOptions,
 } from "@/lib/authTokens";
+import { detectSqliRisk, sanitizeEmail, sanitizeInput } from "@/lib/security";
 
 export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
+    const cleanEmail = sanitizeEmail(email);
+    const cleanPassword = sanitizeInput(password);
+
+    if (!cleanEmail || !cleanPassword) {
+      return NextResponse.json(
+        { success: false, message: "Email and password are required" },
+        { status: 400 }
+      );
+    }
+
+    if (detectSqliRisk(cleanEmail)) {
+      return NextResponse.json(
+        { success: false, message: "Invalid login input" },
+        { status: 400 }
+      );
+    }
 
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: cleanEmail },
     });
 
     if (!user) {
@@ -22,7 +39,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const isValid = await bcrypt.compare(password, user.password);
+    const isValid = await bcrypt.compare(cleanPassword, user.password);
 
     if (!isValid) {
       return NextResponse.json(

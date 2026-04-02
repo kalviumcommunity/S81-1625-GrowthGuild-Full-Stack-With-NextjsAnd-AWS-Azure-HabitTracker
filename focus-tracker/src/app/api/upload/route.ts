@@ -14,6 +14,7 @@ import {
   getRequestActor,
   unauthorizedResponse,
 } from "@/lib/rbac";
+import { detectSqliRisk, sanitizeInput } from "@/lib/security";
 
 export async function POST(req: Request) {
   try {
@@ -51,10 +52,12 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const { filename, fileType, fileSize, userId } = body;
+    const cleanFilename = sanitizeInput(filename);
+    const cleanFileType = sanitizeInput(fileType);
     const effectiveUserId = actor.role === "admin" && userId ? userId : actor.userId;
 
     // Validate required fields
-    if (!filename || !fileType) {
+    if (!cleanFilename || !cleanFileType) {
       return NextResponse.json(
         {
           success: false,
@@ -64,8 +67,15 @@ export async function POST(req: Request) {
       );
     }
 
+    if ([cleanFilename, cleanFileType].some(detectSqliRisk)) {
+      return NextResponse.json(
+        { success: false, message: "Input rejected by security policy" },
+        { status: 400 }
+      );
+    }
+
     // Validate file type
-    if (!validateFileType(fileType)) {
+    if (!validateFileType(cleanFileType)) {
       return NextResponse.json(
         {
           success: false,
@@ -87,10 +97,10 @@ export async function POST(req: Request) {
     }
 
     // Generate unique file key
-    const key = generateFileKey(filename, effectiveUserId);
+    const key = generateFileKey(cleanFilename, effectiveUserId);
 
     // Generate pre-signed URL (expires in 60 seconds)
-    const uploadUrl = await generatePresignedUploadUrl(key, fileType, 60);
+    const uploadUrl = await generatePresignedUploadUrl(key, cleanFileType, 60);
 
     if (!uploadUrl) {
       return NextResponse.json(

@@ -6,6 +6,11 @@ import {
   getRequestActor,
   unauthorizedResponse,
 } from "@/lib/rbac";
+import {
+  detectSqliRisk,
+  parseSafeInt,
+  sanitizeInput,
+} from "@/lib/security";
 
 // GET - List all files (with optional filtering by user)
 export async function GET(req: Request) {
@@ -31,10 +36,10 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
-    const limit = parseInt(searchParams.get("limit") || "50");
-    const offset = parseInt(searchParams.get("offset") || "0");
+    const limit = parseSafeInt(searchParams.get("limit"), 50);
+    const offset = parseSafeInt(searchParams.get("offset"), 0);
 
-    const requestedUserId = userId ? parseInt(userId) : actor.userId;
+    const requestedUserId = userId ? parseSafeInt(userId, actor.userId) : actor.userId;
     const effectiveUserId = actor.role === "admin" ? requestedUserId : actor.userId;
     const where = { uploadedBy: effectiveUserId };
 
@@ -98,10 +103,14 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const { name, key, url, fileType, size, uploadedBy } = body;
+    const cleanName = sanitizeInput(name);
+    const cleanKey = sanitizeInput(key);
+    const cleanUrl = sanitizeInput(url);
+    const cleanFileType = sanitizeInput(fileType);
     const effectiveUploadedBy = actor.role === "admin" && uploadedBy ? uploadedBy : actor.userId;
 
     // Validate required fields
-    if (!name || !key || !url || !fileType) {
+    if (!cleanName || !cleanKey || !cleanUrl || !cleanFileType) {
       return NextResponse.json(
         {
           success: false,
@@ -111,9 +120,16 @@ export async function POST(req: Request) {
       );
     }
 
+    if ([cleanName, cleanKey, cleanUrl, cleanFileType].some(detectSqliRisk)) {
+      return NextResponse.json(
+        { success: false, message: "Input rejected by security policy" },
+        { status: 400 }
+      );
+    }
+
     // Check if file with this key already exists
     const existingFile = await prisma.file.findUnique({
-      where: { key },
+      where: { key: cleanKey },
     });
 
     if (existingFile) {
@@ -126,10 +142,10 @@ export async function POST(req: Request) {
     // Create file record
     const file = await prisma.file.create({
       data: {
-        name,
-        key,
-        url,
-        fileType,
+        name: cleanName,
+        key: cleanKey,
+        url: cleanUrl,
+        fileType: cleanFileType,
         size: size || null,
         uploadedBy: effectiveUploadedBy,
       },
@@ -177,8 +193,9 @@ export async function DELETE(req: Request) {
     }
 
     // Find the file
+    const parsedId = parseSafeInt(id, 0);
     const file = await prisma.file.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: parsedId },
     });
 
     if (!file) {
@@ -217,7 +234,7 @@ export async function DELETE(req: Request) {
 
     // Delete from database
     await prisma.file.delete({
-      where: { id: parseInt(id) },
+      where: { id: parsedId },
     });
 
     return NextResponse.json({

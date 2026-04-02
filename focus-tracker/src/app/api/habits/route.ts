@@ -6,6 +6,11 @@ import {
   getRequestActor,
   unauthorizedResponse,
 } from "@/lib/rbac";
+import {
+  detectSqliRisk,
+  parseSafeInt,
+  sanitizeInput,
+} from "@/lib/security";
 
 // GET /api/habits?userId=1
 export async function GET(req: Request) {
@@ -32,7 +37,7 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
-    const requestedUserId = userId ? parseInt(userId) : actor.userId;
+    const requestedUserId = userId ? parseSafeInt(userId, actor.userId) : actor.userId;
 
     const effectiveUserId = actor.role === "admin" ? requestedUserId : actor.userId;
 
@@ -85,10 +90,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const { title, description, frequency, userId } = body;
-    const targetUserId = actor.role === "admin" && userId ? parseInt(userId) : actor.userId;
+    const cleanTitle = sanitizeInput(title);
+    const cleanDescription = description ? sanitizeInput(description) : null;
+    const cleanFrequency = frequency ? sanitizeInput(frequency) : "DAILY";
+    const targetUserId = actor.role === "admin" && userId ? parseSafeInt(userId, actor.userId) : actor.userId;
 
     // Validation
-    if (!title) {
+    if (!cleanTitle) {
       return sendError(
         "Title is required",
         ERROR_CODES.VALIDATION_ERROR,
@@ -96,11 +104,19 @@ export async function POST(req: Request) {
       );
     }
 
+    if ([cleanTitle, cleanDescription || "", cleanFrequency].some(detectSqliRisk)) {
+      return sendError(
+        "Input rejected by security policy",
+        ERROR_CODES.VALIDATION_ERROR,
+        400
+      );
+    }
+
     const habit = await prisma.habit.create({
       data: {
-        title: title.trim(),
-        description: description?.trim() || null,
-        frequency: frequency || "DAILY",
+        title: cleanTitle,
+        description: cleanDescription,
+        frequency: cleanFrequency,
         userId: targetUserId,
         isActive: true,
       },

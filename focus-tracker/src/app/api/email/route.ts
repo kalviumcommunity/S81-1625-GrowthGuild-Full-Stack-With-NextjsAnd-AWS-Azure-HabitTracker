@@ -7,6 +7,12 @@ import {
   activityAlertTemplate,
   notificationTemplate,
 } from "@/lib/emailTemplates";
+import {
+  detectSqliRisk,
+  sanitizeEmail,
+  sanitizeInput,
+  sanitizeRichText,
+} from "@/lib/security";
 
 // GET - Check if email service is configured
 export async function GET() {
@@ -33,9 +39,20 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const { to, subject, message, template, templateData } = body;
+    const cleanTo = sanitizeEmail(to || "");
+    const cleanSubject = sanitizeInput(subject || "");
+    const cleanMessage = sanitizeRichText(message || "");
+    const cleanTemplate = sanitizeInput(template || "");
+
+    if ([cleanTo, cleanSubject, cleanMessage, cleanTemplate].some((v) => v && detectSqliRisk(v))) {
+      return NextResponse.json(
+        { success: false, message: "Input rejected by security policy" },
+        { status: 400 }
+      );
+    }
 
     // Validate required fields
-    if (!to) {
+    if (!cleanTo) {
       return NextResponse.json(
         { success: false, message: "Recipient email (to) is required" },
         { status: 400 }
@@ -45,10 +62,10 @@ export async function POST(req: Request) {
     let emailContent: { subject: string; html: string; text?: string };
 
     // Use template if specified, otherwise use raw message
-    if (template) {
-      switch (template) {
+    if (cleanTemplate) {
+      switch (cleanTemplate) {
         case "welcome":
-          emailContent = welcomeEmailTemplate(templateData?.userName || "User");
+          emailContent = welcomeEmailTemplate(sanitizeInput(templateData?.userName || "User"));
           break;
 
         case "password-reset":
@@ -58,10 +75,7 @@ export async function POST(req: Request) {
               { status: 400 }
             );
           }
-          emailContent = passwordResetTemplate(
-            templateData?.userName || "User",
-            templateData.resetToken
-          );
+          emailContent = passwordResetTemplate(sanitizeInput(templateData?.userName || "User"), sanitizeInput(templateData.resetToken));
           break;
 
         case "streak":
@@ -71,11 +85,7 @@ export async function POST(req: Request) {
               { status: 400 }
             );
           }
-          emailContent = streakNotificationTemplate(
-            templateData?.userName || "User",
-            templateData.habitName,
-            templateData.streakDays
-          );
+          emailContent = streakNotificationTemplate(sanitizeInput(templateData?.userName || "User"), sanitizeInput(templateData.habitName), templateData.streakDays);
           break;
 
         case "activity-alert":
@@ -85,11 +95,7 @@ export async function POST(req: Request) {
               { status: 400 }
             );
           }
-          emailContent = activityAlertTemplate(
-            templateData?.userName || "User",
-            templateData.activityType,
-            templateData.details
-          );
+          emailContent = activityAlertTemplate(sanitizeInput(templateData?.userName || "User"), sanitizeInput(templateData.activityType), sanitizeInput(templateData.details));
           break;
 
         case "notification":
@@ -100,37 +106,37 @@ export async function POST(req: Request) {
             );
           }
           emailContent = notificationTemplate(
-            templateData?.userName || "User",
-            templateData.title,
-            templateData.message,
-            templateData.ctaText,
-            templateData.ctaUrl
+            sanitizeInput(templateData?.userName || "User"),
+            sanitizeInput(templateData.title),
+            sanitizeInput(templateData.message),
+            templateData.ctaText ? sanitizeInput(templateData.ctaText) : undefined,
+            templateData.ctaUrl ? sanitizeInput(templateData.ctaUrl) : undefined
           );
           break;
 
         default:
           return NextResponse.json(
-            { success: false, message: `Unknown template: ${template}` },
+            { success: false, message: `Unknown template: ${cleanTemplate}` },
             { status: 400 }
           );
       }
     } else {
       // Raw email - require subject and message
-      if (!subject || !message) {
+      if (!cleanSubject || !cleanMessage) {
         return NextResponse.json(
           { success: false, message: "Subject and message are required for raw emails" },
           { status: 400 }
         );
       }
       emailContent = {
-        subject,
-        html: message,
+        subject: cleanSubject,
+        html: cleanMessage,
       };
     }
 
     // Send the email
     const result = await sendEmail({
-      to,
+      to: cleanTo,
       subject: emailContent.subject,
       html: emailContent.html,
       text: emailContent.text,
