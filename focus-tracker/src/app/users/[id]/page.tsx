@@ -36,6 +36,14 @@ export default function UserProfilePage({ params }: UserProfileProps) {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        const shouldSimulateDelay =
+          typeof window !== "undefined" &&
+          new URLSearchParams(window.location.search).get("demoSlow") === "1";
+
+        if (shouldSimulateDelay) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+        }
+
         const token = localStorage.getItem("token");
         
         // Fetch user details
@@ -90,6 +98,10 @@ export default function UserProfilePage({ params }: UserProfileProps) {
     { label: user?.name || `User ${id}`, href: `/users/${id}` },
   ];
 
+  if (!loading && error) {
+    throw new Error(error);
+  }
+
   // Get habit icon based on title
   const getHabitIcon = (title: string) => {
     const lowercaseTitle = title.toLowerCase();
@@ -115,23 +127,6 @@ export default function UserProfilePage({ params }: UserProfileProps) {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
               <p className="mt-4 text-gray-500">Loading user profile...</p>
             </div>
-          </div>
-        )}
-
-        {/* Error State */}
-        {error && !loading && (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">😕</div>
-            <h2 className="text-2xl font-bold text-red-600 mb-2">{error}</h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-6">
-              The user with ID <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{id}</code> could not be found.
-            </p>
-            <Link
-              href="/users"
-              className="inline-block px-6 py-3 bg-gradient-to-r from-indigo-600 to-cyan-600 text-white rounded-xl font-medium hover:opacity-90 transition-opacity"
-            >
-              ← Back to Users
-            </Link>
           </div>
         )}
 

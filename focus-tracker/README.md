@@ -1073,3 +1073,77 @@ vercel --prod
 
 MIT License - See LICENSE file for details.
 
+---
+
+## ✅ Assignment: Asynchronous State Handling (Loading + Error)
+
+This project now includes route-level fallback UI for asynchronous states in the App Router so users never see blank or confusing transitions.
+
+### Why This Improves UX
+
+Loading and error states communicate system status clearly:
+
+- **Loading**: Shows structured skeleton UI while data is being fetched.
+- **Error**: Prevents hard crashes and offers a clear recovery action.
+
+This keeps trust high by making app behavior predictable, even when network calls are slow or fail.
+
+### Implementation Summary
+
+Implemented route-level fallback files in users routes:
+
+- `src/app/users/loading.tsx`
+- `src/app/users/error.tsx`
+- `src/app/users/[id]/loading.tsx`
+- `src/app/users/[id]/error.tsx`
+
+Updated page behavior so failures are handled by App Router error boundaries:
+
+- `src/app/users/page.tsx`
+- `src/app/users/[id]/page.tsx`
+
+Implementation details:
+
+- Replaced spinner-first loading with skeleton-style loaders (`animate-pulse` blocks).
+- Added retry-friendly route error UI with `reset()` buttons.
+- Added optional slow-network simulation via query param:
+  - `/users?demoSlow=1`
+  - `/users/1?demoSlow=1`
+
+### Testing States
+
+1. **Skeleton Loading State**
+  - Open `/users?demoSlow=1`
+  - Open `/users/1?demoSlow=1`
+  - Optional: Enable browser network throttling (Fast 3G/Slow 3G)
+
+2. **Error Fallback State**
+  - Temporarily break an API route URL or stop API/database service
+  - Visit `/users` or `/users/[id]`
+  - Confirm the error boundary appears with a `Try Again` action
+
+3. **Successful Retry State**
+  - Restore API availability
+  - Click `Try Again`
+  - Confirm route renders successfully
+
+### Evidence Checklist
+
+Capture and attach screenshots/GIFs for:
+
+- [ ] Skeleton loading UI on `/users`
+- [ ] Skeleton loading UI on `/users/[id]`
+- [ ] Error fallback UI with retry button
+- [ ] Successful render after pressing retry
+
+Recommended path for evidence assets:
+
+- `docs/screenshots/async-states/loading-users.png`
+- `docs/screenshots/async-states/loading-user-profile.png`
+- `docs/screenshots/async-states/error-state.png`
+- `docs/screenshots/async-states/retry-success.png`
+
+### Reflection
+
+Handling async states with skeletons and error boundaries makes the app feel reliable under real-world conditions where latency and failures are normal. Instead of uncertainty or abrupt crashes, users get clear feedback and a safe path to recover, which directly improves confidence and perceived quality.
+

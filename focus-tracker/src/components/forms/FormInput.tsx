@@ -73,7 +73,7 @@ const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
         {/* Label */}
         <label
           htmlFor={inputId}
-          className="block text-sm font-medium text-gray-200"
+          className="block text-sm font-medium text-[var(--foreground)]"
         >
           {label}
           {props.required && (
@@ -85,7 +85,7 @@ const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
         <div className="relative">
           {/* Left Icon */}
           {icon && (
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[var(--muted)]">
               {icon}
             </div>
           )}
@@ -102,14 +102,14 @@ const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
             className={`
               w-full px-4 py-3 rounded-xl
               border transition-all duration-200 outline-none
-              bg-gray-800/50 text-white placeholder-gray-500
+              bg-[var(--card)]/80 text-[var(--foreground)] placeholder-[var(--muted)]
               ${icon ? "pl-12" : ""}
               ${showSuccess ? "pr-12" : ""}
               ${hasError
                 ? "border-red-500/50 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
                 : showSuccess
                 ? "border-green-500/50 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
-                : "border-gray-700 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                : "border-[var(--border)] focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
               }
               ${className}
             `}
@@ -167,7 +167,7 @@ const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
         {helperText && !hasError && (
           <p
             id={`${inputId}-helper`}
-            className="text-sm text-gray-500"
+            className="text-sm text-[var(--muted)]"
           >
             {helperText}
           </p>
