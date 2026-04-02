@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import { fetchWithOptions } from "@/lib/fetcher";
 
 interface UploadConfig {
   allowedTypes: string[];
@@ -43,8 +44,7 @@ export default function FileUpload({
   const fetchConfig = useCallback(async () => {
     try {
       setConfigLoading(true);
-      const res = await fetch("/api/upload");
-      const data = await res.json();
+      const data = await fetchWithOptions<UploadConfig & { success: boolean }>("/api/upload");
       if (data.success) {
         setConfig(data);
       } else {
@@ -75,9 +75,14 @@ export default function FileUpload({
     try {
       // Step 1: Request pre-signed URL
       setProgress(10);
-      const urlRes = await fetch("/api/upload", {
+      const urlData = await fetchWithOptions<{
+        success: boolean;
+        uploadUrl: string;
+        key: string;
+        fileUrl: string;
+        message?: string;
+      }>("/api/upload", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           filename: file.name,
           fileType: file.type,
@@ -85,8 +90,6 @@ export default function FileUpload({
           userId,
         }),
       });
-
-      const urlData = await urlRes.json();
 
       if (!urlData.success) {
         throw new Error(urlData.message || "Failed to get upload URL");
@@ -108,9 +111,12 @@ export default function FileUpload({
       setProgress(70);
 
       // Step 3: Store file metadata in database
-      const metadataRes = await fetch("/api/files", {
+      const metadataData = await fetchWithOptions<{
+        success: boolean;
+        file: UploadedFile;
+        message?: string;
+      }>("/api/files", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: file.name,
           key: urlData.key,
@@ -120,8 +126,6 @@ export default function FileUpload({
           uploadedBy: userId,
         }),
       });
-
-      const metadataData = await metadataRes.json();
 
       if (!metadataData.success) {
         throw new Error(metadataData.message || "Failed to save file metadata");
@@ -174,12 +178,6 @@ export default function FileUpload({
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       uploadFile(e.dataTransfer.files[0]);
     }
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + " B";
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   };
 
   return (

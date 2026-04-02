@@ -1243,3 +1243,87 @@ You can customize token lifetimes with:
 - `JWT_SECRET` (required)
 - `REFRESH_TOKEN_SECRET` (optional fallback to `JWT_SECRET`)
 
+---
+
+## ✅ Assignment: Role-Based Access Control (RBAC)
+
+This project now enforces role-based permissions in both API routes and UI components using a centralized policy map.
+
+### Roles and Permissions
+
+Defined in `src/config/roles.ts`:
+
+| Role | Core Permissions | Typical Access |
+|------|------------------|----------------|
+| `admin` | create/read/update/delete + user/file/habit management | Full system access |
+| `editor` | read/create/update + upload + own-file deletion | Can work on content/resources but cannot perform destructive admin operations |
+| `viewer` | read-only + dashboard visibility | View-only experience |
+
+Role normalization is supported so legacy values like `USER` are mapped safely to a supported role (`editor`).
+
+### Policy Evaluation Logic
+
+Implemented in `src/lib/rbac.ts`:
+
+1. Parse actor context from request headers (`x-user-id`, `x-user-role`) injected by middleware.
+2. Normalize role to `admin | editor | viewer`.
+3. Evaluate permission from role map.
+4. Optionally allow ownership-based access for specific operations.
+5. Log allow/deny decisions for auditability.
+
+Example decision pattern:
+
+- `checkPermission({ actor, permission, resource, action, targetUserId, allowOwner })`
+- Returns allow/deny and logs:
+  - `"[RBAC] editor delete files: DENIED"`
+  - `"[RBAC] admin update user_profile: ALLOWED"`
+
+### API Enforcement Coverage
+
+RBAC checks are enforced in:
+
+- `src/app/api/users/route.ts` (`read_users`)
+- `src/app/api/users/[id]/route.ts` (`read_users`, `manage_users`)
+- `src/app/api/habits/route.ts` (`read_habits`, `create_habit`)
+- `src/app/api/habits/[id]/route.ts` (`read_habits`, `update_habits`, `delete_habits`)
+- `src/app/api/habits/toggle/route.ts` (`update_habits`)
+- `src/app/api/dashboard/stats/route.ts` (`view_dashboard` + owner/admin constraint)
+- `src/app/api/files/route.ts` (`read_files`, `upload_files`, `delete_own_file`, `delete_any_file`)
+- `src/app/api/upload/route.ts` (`upload_files`)
+- `src/app/api/admin/route.ts` (`manage_users`)
+
+Middleware (`src/app/middleware.ts`) now authenticates and attaches actor headers for protected API prefixes before route handlers run.
+
+### UI Enforcement Coverage
+
+Role-based UI controls are implemented in:
+
+- `src/app/habits/page.tsx`
+  - Create button hidden for read-only roles
+  - Delete button visible only when role has delete permission
+- `src/app/uploads/page.tsx`
+  - Upload panel hidden for roles without upload permission
+  - Delete action visible only for authorized roles/ownership
+
+### Allow / Deny Evidence Checklist
+
+Capture logs/screenshots from terminal or browser console for:
+
+- [ ] Admin can update/delete user records (ALLOW)
+- [ ] Editor denied for admin-only delete habit or user management (DENY)
+- [ ] Viewer denied for create/upload actions (DENY)
+- [ ] Editor allowed for create/update habit (ALLOW)
+- [ ] File delete allowed for owner role path and denied otherwise
+
+Recommended evidence folder:
+
+- `docs/screenshots/rbac/admin-allow.png`
+- `docs/screenshots/rbac/editor-deny-admin-action.png`
+- `docs/screenshots/rbac/viewer-deny-create.png`
+- `docs/screenshots/rbac/editor-allow-habit-update.png`
+- `docs/screenshots/rbac/file-ownership-checks.png`
+
+### Reflection
+
+This RBAC design scales because policy definitions are centralized and reused by both backend and frontend. Auditing is built in through explicit allow/deny decision logs for every protected operation. For more complex systems, this model can evolve into policy-based access control (PBAC/ABAC) by adding contextual attributes (tenant, resource sensitivity, environment) to the same evaluation pipeline.
+

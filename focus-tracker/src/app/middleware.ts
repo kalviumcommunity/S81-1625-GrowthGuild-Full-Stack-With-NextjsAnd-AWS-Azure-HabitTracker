@@ -11,6 +11,16 @@ const publicApiRoutes = [
   "/api/auth/logout",
 ];
 
+const protectedApiPrefixes = [
+  "/api/users",
+  "/api/admin",
+  "/api/habits",
+  "/api/files",
+  "/api/upload",
+  "/api/dashboard",
+  "/api/email",
+];
+
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
@@ -31,7 +41,7 @@ export function middleware(req: NextRequest) {
     }
 
     // Protected API routes require token in header
-    if (pathname.startsWith("/api/users") || pathname.startsWith("/api/admin")) {
+    if (protectedApiPrefixes.some((prefix) => pathname.startsWith(prefix))) {
       const authHeader = req.headers.get("authorization");
       const token = authHeader?.split(" ")[1];
 
@@ -76,9 +86,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Protected page routes - check for token in cookies
-  // Note: For client-side auth with localStorage, the ProtectedRoute component handles this
-  // This middleware provides an additional layer for cookie-based auth if needed
+  // Protected page routes are handled client-side by ProtectedRoute.
   
   return NextResponse.next();
 }

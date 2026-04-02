@@ -5,6 +5,8 @@ import { useAuth } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import FileUpload from "@/components/FileUpload";
+import { fetchWithOptions } from "@/lib/fetcher";
+import { hasPermission, normalizeRole } from "@/lib/rbac";
 
 interface UploadedFile {
   id: number;
@@ -23,13 +25,18 @@ interface UploadedFile {
 
 export default function UploadsPage() {
   const { user } = useAuth();
+  const normalizedRole = normalizeRole(user?.role);
+  const canUploadFiles = hasPermission(normalizedRole, "upload_files");
+  const canDeleteAnyFile = hasPermission(normalizedRole, "delete_any_file");
+  const canDeleteOwnFile = hasPermission(normalizedRole, "delete_own_file");
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchFiles = async () => {
     try {
-      const res = await fetch(`/api/files${user?.id ? `?userId=${user.id}` : ""}`);
-      const data = await res.json();
+      const data = await fetchWithOptions<{ success: boolean; files: UploadedFile[] }>(
+        `/api/files${user?.id ? `?userId=${user.id}` : ""}`
+      );
       if (data.success) {
         setFiles(data.files);
       }
@@ -51,13 +58,19 @@ export default function UploadsPage() {
   };
 
   const handleDelete = async (fileId: number) => {
+    const target = files.find((file) => file.id === fileId);
+    const isOwner = target?.user?.id === user?.id;
+    if (!canDeleteAnyFile && !(canDeleteOwnFile && isOwner)) {
+      alert("You do not have permission to delete this file.");
+      return;
+    }
+
     if (!confirm("Are you sure you want to delete this file?")) return;
 
     try {
-      const res = await fetch(`/api/files?id=${fileId}`, {
+      const data = await fetchWithOptions<{ success: boolean; message?: string }>(`/api/files?id=${fileId}`, {
         method: "DELETE",
       });
-      const data = await res.json();
 
       if (data.success) {
         setFiles((prev) => prev.filter((f) => f.id !== fileId));
@@ -139,10 +152,16 @@ export default function UploadsPage() {
                 <span className="text-2xl">☁️</span>
                 Upload New File
               </h2>
-              <FileUpload
-                userId={user?.id}
-                onUploadComplete={handleUploadComplete}
-              />
+              {canUploadFiles ? (
+                <FileUpload
+                  userId={user?.id}
+                  onUploadComplete={handleUploadComplete}
+                />
+              ) : (
+                <div className="p-4 rounded-xl border border-amber-400/30 bg-amber-400/10 text-amber-300 text-sm">
+                  Your current role is read-only. Upload actions are disabled.
+                </div>
+              )}
             </div>
           </div>
 
@@ -243,15 +262,17 @@ export default function UploadsPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
                       </a>
-                      <button
-                        onClick={() => handleDelete(file.id)}
-                        className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                        title="Delete file"
-                      >
-                        <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
+                      {(canDeleteAnyFile || (canDeleteOwnFile && file.user?.id === user?.id)) && (
+                        <button
+                          onClick={() => handleDelete(file.id)}
+                          className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                          title="Delete file"
+                        >
+                          <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}

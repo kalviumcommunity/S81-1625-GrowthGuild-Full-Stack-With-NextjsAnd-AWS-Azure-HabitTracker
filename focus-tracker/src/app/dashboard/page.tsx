@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { useAuth } from "@/context/AuthContext";
+import { fetchWithOptions } from "@/lib/fetcher";
 
 interface TodayHabit {
   habitId: number;
@@ -44,8 +45,9 @@ export default function DashboardPage() {
     if (!user?.id) return;
 
     try {
-      const response = await fetch(`/api/dashboard/stats?userId=${user.id}`);
-      const result = await response.json();
+      const result = await fetchWithOptions<{ success: boolean; data: DashboardData; message?: string }>(
+        `/api/dashboard/stats?userId=${user.id}`
+      );
 
       if (result.success) {
         setData(result.data);
@@ -70,13 +72,10 @@ export default function DashboardPage() {
 
     setToggling(habitId);
     try {
-      const response = await fetch("/api/habits/toggle", {
+      const result = await fetchWithOptions<{ success: boolean; message?: string }>("/api/habits/toggle", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ habitId, userId: user.id }),
       });
-
-      const result = await response.json();
 
       if (result.success) {
         // Refresh dashboard data after toggle

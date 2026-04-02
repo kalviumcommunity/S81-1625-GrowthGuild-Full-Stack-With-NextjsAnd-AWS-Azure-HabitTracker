@@ -1,12 +1,36 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import {
+  checkPermission,
+  getRequestActor,
+  unauthorizedResponse,
+} from "@/lib/rbac";
 
 // GET /api/users/:id - Get a single user by ID
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const actor = getRequestActor(req);
+    if (!actor) {
+      return unauthorizedResponse();
+    }
+
+    const canReadUsers = checkPermission({
+      actor,
+      permission: "read_users",
+      resource: "user_profile",
+      action: "read",
+    });
+
+    if (!canReadUsers) {
+      return NextResponse.json(
+        { success: false, message: "Access denied: insufficient permissions" },
+        { status: 403 }
+      );
+    }
+
     const { id } = await params;
     
     const user = await prisma.user.findUnique({
@@ -44,6 +68,25 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const actor = getRequestActor(req);
+    if (!actor) {
+      return unauthorizedResponse();
+    }
+
+    const canManageUsers = checkPermission({
+      actor,
+      permission: "manage_users",
+      resource: "user_profile",
+      action: "update",
+    });
+
+    if (!canManageUsers) {
+      return NextResponse.json(
+        { success: false, message: "Access denied: admin role required" },
+        { status: 403 }
+      );
+    }
+
     const { id } = await params;
     const body = await req.json();
 
@@ -78,10 +121,29 @@ export async function PUT(
 
 // DELETE /api/users/:id - Delete a user
 export async function DELETE(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const actor = getRequestActor(req);
+    if (!actor) {
+      return unauthorizedResponse();
+    }
+
+    const canManageUsers = checkPermission({
+      actor,
+      permission: "manage_users",
+      resource: "user_profile",
+      action: "delete",
+    });
+
+    if (!canManageUsers) {
+      return NextResponse.json(
+        { success: false, message: "Access denied: admin role required" },
+        { status: 403 }
+      );
+    }
+
     const { id } = await params;
 
     // Delete associated data first
